@@ -1,6 +1,7 @@
 // lib/teacher/teacher_page.dart
 import 'package:flutter/material.dart';
 import 'course.dart'; // Import CoursePage
+import 'forgot_password.dart';
 
 class TeacherPage extends StatelessWidget {
   TextEditingController usernameController = TextEditingController();
@@ -55,6 +56,17 @@ class TeacherPage extends StatelessWidget {
                     'Login',
                     style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
+                ),
+                TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ForgotPasswordPage(),
+                  ),
+                );
+              },
+              child: Text('Forgot Password?'),
                 ),
               ],
             ),

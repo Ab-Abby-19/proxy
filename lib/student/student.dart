@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'create_account.dart'; // Import the necessary create account page
 import 'subject.dart'; // Import the necessary subject page
+import 'forgot_password.dart'; // Import the forgot password page
 
 class StudentPage extends StatefulWidget {
   @override
@@ -61,6 +62,15 @@ class _StudentPageState extends State<StudentPage> {
                     'Login',
                     style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
+                ),
+                SizedBox(height: 20),
+                TextButton(
+                  onPressed: () {
+                    // Navigate to Forgot Password Page
+                    _navigateTo(context, ForgotPasswordPage());
+                  },
+                  child: Text('Forgot Password?',
+                    ),
                 ),
                 SizedBox(height: 20),
                 TextButton(
