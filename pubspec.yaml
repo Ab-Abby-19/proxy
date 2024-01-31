@@ -43,6 +43,7 @@ dependencies:
   network_info_plus: ^4.1.0+1
   permission_handler: ^11.2.0
   location: ^5.0.3
+  fl_chart: ^0.66.1
 
 dev_dependencies:
   flutter_test:

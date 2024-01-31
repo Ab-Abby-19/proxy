@@ -1,7 +1,8 @@
 // lib/student/subject.dart
 import 'package:flutter/material.dart';
 import 'add_subject.dart'; // Import the necessary add subject page
-import 'uct101_attendance.dart'; // Import the UCT101 Attendance Page
+import 'uct101_attendance.dart';
+import 'view_attendance.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
@@ -16,17 +17,108 @@ class StudentSubjectPage extends StatefulWidget {
 }
 
 class _StudentSubjectPageState extends State<StudentSubjectPage> {
-  late Future<List<Subject>> subjects;
+  Future<List<Subject>> subjects = Future.value([]);
 
   @override
   void initState() {
     super.initState();
-    // subjects = fetchSubjects();
+    subjects = fetchSubjects();
   }
 
   @override
   Widget build(BuildContext context) {
     return _buildCoursePage(context);
+  }
+
+  Widget _buildSubjectTable(BuildContext context, List<Subject> subjects) {
+    if (subjects.isEmpty) {
+      return Text('No courses found',
+          style: TextStyle(color: Colors.white, fontSize: 16));
+    } else {
+      return DataTable(
+        columnSpacing: 10.0, // Adjust column spacing as needed
+        headingTextStyle: TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+        ),
+        columns: [
+          DataColumn(
+            label: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Serial', style: TextStyle(fontSize: 12)),
+                Text('Number', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+          DataColumn(
+            label: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Subject', style: TextStyle(fontSize: 12)),
+                Text('Code', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+          DataColumn(
+            label: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Subject', style: TextStyle(fontSize: 12)),
+                Text('Name', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+        ],
+        rows: subjects.map((subject) {
+          return DataRow(
+            cells: [
+              DataCell(Text(
+                subject.serial.toString(),
+                style: TextStyle(color: Colors.white),
+              )),
+              DataCell(
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () {
+                      _navigateTo(
+                          context,
+                          ViewAttendancePage(
+                            cookieJar: widget.cookieJar,
+                            subjectCode: subject.courseCode,
+                          ));
+                    },
+                    child: Text(
+                      subject.courseCode,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+              DataCell(
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () {
+                      _navigateTo(context, UCT101AttendancePage()); //TODO:
+                    },
+                    child: Text(
+                      subject.courseName,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
   }
 
   Widget _buildCoursePage(BuildContext context) {
@@ -47,12 +139,15 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
                 return CircularProgressIndicator();
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
+              } else if (snapshot.data == null) {
+                return Container();
               } else {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSubjectTable(context, snapshot.data!),
+                    if (snapshot.data != null)
+                      _buildSubjectTable(context, snapshot.data!),
                     SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
@@ -80,93 +175,13 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
     );
   }
 
-  Widget _buildSubjectTable(BuildContext context, List<Subject> subjects) {
-    return DataTable(
-      columnSpacing: 10.0, // Adjust column spacing as needed
-      headingTextStyle: TextStyle(
-        color: Colors.white,
-        fontSize: 14,
-        fontWeight: FontWeight.bold,
-      ),
-      columns: [
-        DataColumn(
-          label: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Serial', style: TextStyle(fontSize: 12)),
-              Text('Number', style: TextStyle(fontSize: 12)),
-            ],
-          ),
-        ),
-        DataColumn(
-          label: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Subject', style: TextStyle(fontSize: 12)),
-              Text('Code', style: TextStyle(fontSize: 12)),
-            ],
-          ),
-        ),
-        DataColumn(
-          label: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Subject', style: TextStyle(fontSize: 12)),
-              Text('Name', style: TextStyle(fontSize: 12)),
-            ],
-          ),
-        ),
-      ],
-      rows: subjects.map((subject) {
-        return DataRow(
-          cells: [
-            DataCell(Text(
-              subject.serial.toString(),
-              style: TextStyle(color: Colors.white),
-            )),
-            DataCell(
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () {
-                    _navigateTo(context, UCT101AttendancePage()); //TODO:
-                  },
-                  child: Text(
-                    subject.courseCode,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
-            DataCell(
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () {
-                    _navigateTo(context, UCT101AttendancePage()); //TODO:
-                  },
-                  child: Text(
-                    subject.courseName,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      }).toList(),
-    );
-  }
-
   Future<List<Subject>> fetchSubjects() async {
     try {
       List<Cookie> res = await widget.cookieJar
           .loadForRequest(Uri.parse('http://localhost:3000/student/login'));
       if (res.isNotEmpty) {
         String token = res.first.value;
+        // print(token);
         final dio = Dio();
         dio.interceptors.add(CookieManager(widget.cookieJar));
 
@@ -206,7 +221,7 @@ class Subject {
 
   factory Subject.fromJson(Map<String, dynamic> json) {
     return Subject(
-      serial: json['serial'] as int,
+      serial: json['serial'] ?? 1,
       courseCode: json['courseCode'],
       courseName: json['courseName'],
     );

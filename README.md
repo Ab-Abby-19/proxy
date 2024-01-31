@@ -35,6 +35,7 @@
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
+    <li><a href="#backend-api">Backend API</li>
   </ol>
 </details>
 
@@ -229,6 +230,13 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 Abhinav Gupta - agupta20_be21@thapar.edu
 
 Project Link: [https://github.com/Ab-Abby-19/proxy](https://github.com/Ab-Abby-19/proxy)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+## Backend API
+
+To access the backend API, please visit [https://github.com/Jasleen8801/proxy-api](https://gihtub.com/Jasleen8801/proxy-api)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

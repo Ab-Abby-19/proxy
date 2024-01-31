@@ -212,7 +212,7 @@ class Course {
 
   factory Course.fromJson(Map<String, dynamic> json) {
     return Course(
-      serial: json['serial'] as int,
+      serial: json['serial'] ?? 1,
       courseCode: json['courseCode'],
       code: json['code'],
       courseName: json['courseName'],

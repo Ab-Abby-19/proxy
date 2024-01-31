@@ -62,11 +62,11 @@ class MainPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildButton(context, 'TEACHER', TeacherPage(), '👨‍🏫'),
+              _buildButton(context, 'TEACHER', TeacherPage()),
               SizedBox(height: 20),
-              _buildButton(context, 'STUDENT', StudentPage(), '👩‍🎓'),
+              _buildButton(context, 'STUDENT', StudentPage()),
               SizedBox(height: 20),
-              _buildButton(context, 'ADMIN', AdminPage(), '👨‍💼'),
+              _buildButton(context, 'ADMIN', AdminPage()),
             ],
           ),
         ),
@@ -74,8 +74,7 @@ class MainPage extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(
-      BuildContext context, String label, Widget page, String emoji) {
+  Widget _buildButton(BuildContext context, String label, Widget page) {
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -111,10 +110,6 @@ class MainPage extends StatelessWidget {
                 style: TextStyle(fontSize: 26, color: Colors.white),
               ),
               SizedBox(width: 10),
-              Text(
-                emoji,
-                style: TextStyle(fontSize: 26),
-              ),
             ],
           ),
         ),
