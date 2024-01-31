@@ -1,7 +1,11 @@
-// lib/admin/add_teacher.dart
+import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class AddTeacherPage extends StatefulWidget {
+  final CookieJar cookieJar;
+
+  AddTeacherPage({required this.cookieJar});
   @override
   _AddTeacherPageState createState() => _AddTeacherPageState();
 }
@@ -10,6 +14,8 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  final cookieJar = CookieJar();
+  final dio = Dio();
 
   @override
   Widget build(BuildContext context) {
@@ -78,21 +84,34 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
     );
   }
 
-  void _submit() {
+  void _submit() async {
     String enteredUsername = usernameController.text.trim();
     String enteredEmail = emailController.text.trim();
     String enteredPassword = passwordController.text.trim();
 
-    // Perform your submission logic here
+    try {
+      // fetch the cookie - token
+      List<Cookie> results = await widget.cookieJar
+          .loadForRequest(Uri.parse('http://localhost:3000/admin/login'));
+      print(results);
 
-    // For now, let's print the entered values
-    print('Username: $enteredUsername');
-    print('Email: $enteredEmail');
-    print('Password: $enteredPassword');
+      if (results.isNotEmpty) {
+        String token = results.first.value;
+        Response response =
+            await dio.post('http://localhost:3000/admin/create-teacher',
+                data: {
+                  'userName': enteredUsername,
+                  'email': enteredEmail,
+                  'password': enteredPassword,
+                },
+                options: Options(headers: {'Authorization': 'Bearer $token'}));
+        print(response.data);
+      }
+    } catch (e) {
+      print(e);
+      print('Error creating teacher');
+    }
 
-    // You can add logic to save the data, call an API, etc.
-
-    // Redirect to the previous page
     Navigator.pop(context);
   }
 }

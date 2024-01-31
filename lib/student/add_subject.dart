@@ -1,13 +1,22 @@
-// lib/student/add_subject.dart
+import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:wifi/student/subject.dart';
 
 class AddSubjectPage extends StatefulWidget {
+  final CookieJar cookieJar;
+
+  AddSubjectPage({required this.cookieJar});
+
   @override
   _AddSubjectPageState createState() => _AddSubjectPageState();
 }
 
 class _AddSubjectPageState extends State<AddSubjectPage> {
   TextEditingController subjectCodeController = TextEditingController();
+
+  final cookieJar = CookieJar();
+  final dio = Dio();
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +61,35 @@ class _AddSubjectPageState extends State<AddSubjectPage> {
     );
   }
 
-  void _addSubject() {
+  void _addSubject() async {
     String subjectCode = subjectCodeController.text.trim();
-    // Add logic to save the subject code or perform any other action
+
+    try {
+      List<Cookie> res = await widget.cookieJar
+          .loadForRequest(Uri.parse('http://localhost:3000/student/login'));
+
+      if (res.isNotEmpty) {
+        String token = res.first.value;
+        Response response =
+            await dio.post('http://localhost:3000/student/join-course',
+                data: {
+                  'code': subjectCode,
+                },
+                options: Options(headers: {"Authorization": "Bearer $token"}));
+        print(response.data);
+        _navigateTo(context, StudentSubjectPage(cookieJar: cookieJar));
+      }
+    } catch (e) {
+      print(e);
+    }
+
     Navigator.pop(context); // Return to the previous page (subject.dart)
+  }
+
+  void _navigateTo(BuildContext context, Widget page) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => page),
+    );
   }
 }

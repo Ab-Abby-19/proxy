@@ -1,8 +1,11 @@
 // lib/student/login_page.dart
 import 'package:flutter/material.dart';
+import 'package:wifi/student/subject.dart';
 import 'create_account.dart'; // Import the necessary create account page
-import 'subject.dart'; // Import the necessary subject page
 import 'forgot_password.dart'; // Import the forgot password page
+import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 
 class StudentPage extends StatefulWidget {
   @override
@@ -10,8 +13,13 @@ class StudentPage extends StatefulWidget {
 }
 
 class _StudentPageState extends State<StudentPage> {
-  TextEditingController usernameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +37,10 @@ class _StudentPageState extends State<StudentPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextField(
-                  controller: usernameController,
+                  controller: emailController,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    labelText: 'Username',
+                    labelText: 'Email',
                     labelStyle: TextStyle(color: Colors.grey),
                   ),
                 ),
@@ -69,8 +77,9 @@ class _StudentPageState extends State<StudentPage> {
                     // Navigate to Forgot Password Page
                     _navigateTo(context, ForgotPasswordPage());
                   },
-                  child: Text('Forgot Password?',
-                    ),
+                  child: Text(
+                    'Forgot Password?',
+                  ),
                 ),
                 SizedBox(height: 20),
                 TextButton(
@@ -91,21 +100,39 @@ class _StudentPageState extends State<StudentPage> {
     );
   }
 
-  void _login() {
-    String enteredUsername = usernameController.text.toLowerCase().trim();
+  void _login() async {
+    String enteredEmail = emailController.text.toLowerCase().trim();
     String enteredPassword = passwordController.text.trim();
 
-    if (enteredUsername == 'abc' && enteredPassword == '123') {
-      // Correct credentials, navigate to the student portal (subject.dart)
-      _navigateTo(context, StudentSubjectPage());
-    } else {
-      // Incorrect credentials, show a message
+    final cookieJar = CookieJar();
+    final dio = Dio();
+    dio.interceptors.add(CookieManager(cookieJar));
+
+    try {
+      Response response =
+          await dio.post('http://localhost:3000/student/login', data: {
+        'email': enteredEmail,
+        'password': enteredPassword,
+      });
+
+      String token = response.data['token'];
+      List<Cookie> cookies = [Cookie('token', token)];
+      await cookieJar.saveFromResponse(
+          Uri.parse('http://localhost:3000/student/login'), cookies);
+
+      _navigateTo(
+          context,
+          StudentSubjectPage(
+            cookieJar: cookieJar,
+          ));
+    } catch (e) {
+      print('Dio error: $e');
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Incorrect Credentials'),
-            content: Text('Please check your username and password.'),
+            title: Text('Network Error'),
+            content: Text('Check your network connection and try again.'),
             actions: [
               ElevatedButton(
                 onPressed: () {

@@ -2,13 +2,17 @@
 import 'package:flutter/material.dart';
 import 'add_teacher.dart'; // Import AddTeacherPage
 import 'list_teachers.dart'; // Import ListTeachersPage
+import 'package:cookie_jar/cookie_jar.dart';
 
 class TeacherDetailsPage extends StatelessWidget {
+  final CookieJar cookieJar;
+
+  TeacherDetailsPage({required this.cookieJar});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Teacher Details'),
+        title: Text('Admin Dashboard'),
       ),
       body: Container(
         decoration: BoxDecoration(color: const Color.fromARGB(255, 8, 8, 8)),
@@ -21,7 +25,11 @@ class TeacherDetailsPage extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    _navigateTo(context, AddTeacherPage());
+                    _navigateTo(
+                        context,
+                        AddTeacherPage(
+                          cookieJar: cookieJar,
+                        ));
                   },
                   style: ElevatedButton.styleFrom(
                     primary: Color.fromARGB(255, 1, 11, 45),
@@ -38,7 +46,11 @@ class TeacherDetailsPage extends StatelessWidget {
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    _navigateTo(context, ListTeachersPage());
+                    _navigateTo(
+                        context,
+                        ListTeachersPage(
+                          cookieJar: cookieJar,
+                        ));
                   },
                   style: ElevatedButton.styleFrom(
                     primary: Color.fromARGB(255, 1, 11, 45),

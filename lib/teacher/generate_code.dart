@@ -1,19 +1,40 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:network_info_plus/network_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:location/location.dart';
+import 'package:dio/dio.dart';
 
 class GenerateCodePage extends StatefulWidget {
+  final CookieJar cookieJar;
+  final String courseCode;
+
+  GenerateCodePage({required this.cookieJar, required this.courseCode});
+
   @override
   _GenerateCodePageState createState() => _GenerateCodePageState();
 }
 
 class _GenerateCodePageState extends State<GenerateCodePage> {
   late Timer _timer;
-  int _remainingTime = 60; // Initial time in seconds
+  int _remainingTime = 60;
+  final info = NetworkInfo();
+  String _addr = 'wlp2s0';
+  double? _latitude = 51.507351;
+  double? _longitude = -0.127758;
+  late Future<String> _generateCodeFuture;
 
   @override
   void initState() {
     super.initState();
     _startTimer();
+    _generateCodeFuture = _generateRandomCode();
+    // _getNetworkInfo();
+    // _getLocation();
+    // _requestLocationPermission();
   }
 
   @override
@@ -37,10 +58,20 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
               SizedBox(height: 10),
-              Text(
-                _generateRandomCode(),
-                style: TextStyle(fontSize: 24, color: Colors.white),
-              ),
+              FutureBuilder(
+                  future: _generateCodeFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      return Text(
+                        snapshot.data ?? '',
+                        style: TextStyle(fontSize: 24, color: Colors.white),
+                      );
+                    }
+                  }),
               SizedBox(height: 20),
               Text(
                 'Remaining Time: $_remainingTime seconds',
@@ -67,10 +98,36 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
     );
   }
 
-  String _generateRandomCode() {
-    // Implement your logic to generate a random code
-    // For example, you can use a package like crypto to generate a secure random code
-    return 'ABC123'; // Replace with your actual random code
+  Future<String> _generateRandomCode() async {
+    try {
+      var dio = Dio();
+      dio.interceptors.add(CookieManager(widget.cookieJar));
+
+      List<Cookie> res = await widget.cookieJar
+          .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+      // print(res);
+      if (res.isNotEmpty) {
+        String token = res.first.value;
+        Response response = await dio.post(
+          'http://localhost:3000/teacher/create-session',
+          data: {
+            'courseID': widget.courseCode,
+            'location': {
+              'latitude': _latitude,
+              'longitude': _longitude,
+            },
+            'networkInterface': _addr,
+          },
+          options: Options(headers: {'Authorization': 'Bearer $token'}),
+        );
+        print(response.data);
+        String code = response.data['code'];
+        return code;
+      }
+      return '';
+    } catch (e) {
+      throw Exception('Failed to generate random code: $e');
+    }
   }
 
   void _startTimer() {
@@ -86,9 +143,30 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
     });
   }
 
-  void _stopTimer() {
+  void _stopTimer() async {
     if (_timer.isActive) {
-      _timer.cancel();
+      try {
+        _timer.cancel();
+        List<Cookie> res = await widget.cookieJar
+            .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+        if (res.isNotEmpty) {
+          String token = res.first.value;
+          final dio = Dio();
+          dio.interceptors.add(CookieManager(widget.cookieJar));
+
+          Response response =
+              await dio.post('http://localhost:3000/teacher/stop-session',
+                  data: {
+                    'courseID': widget.courseCode,
+                  },
+                  options: Options(headers: {
+                    'Authorization': 'Bearer $token',
+                  }));
+          print(response.data);
+        }
+      } catch (e) {
+        print('Failed to stop timer: $e');
+      }
     }
   }
 
@@ -96,5 +174,49 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
   void dispose() {
     _stopTimer();
     super.dispose();
+  }
+
+  Future<void> _getNetworkInfo() async {
+    try {
+      // _requestLocationPermission();
+      final wifiBroadCast = await info.getWifiBroadcast();
+      print('Wifi broadcast: $wifiBroadCast');
+      if (wifiBroadCast != null) {
+        setState(() {
+          _addr = wifiBroadCast;
+        });
+      }
+      print(wifiBroadCast);
+    } catch (e) {
+      print('Failed to get network info: $e');
+    }
+  }
+
+  void _requestLocationPermission() async {
+    var status = await Permission.location.status;
+    if (status.isDenied) {
+      var result = await Permission.location.request();
+      if (result.isGranted) {
+        print('Permission granted');
+      } else {
+        print('Permission denied');
+      }
+    } else if (status.isGranted) {
+      print('Permission granted');
+    }
+  }
+
+  Future<void> _getLocation() async {
+    try {
+      // _requestLocationPermission();
+      var location = Location();
+      var currLocation = await location.getLocation();
+      setState(() {
+        _latitude = currLocation.latitude;
+        _longitude = currLocation.longitude;
+      });
+    } catch (e) {
+      print('Failed to get location: $e');
+    }
   }
 }

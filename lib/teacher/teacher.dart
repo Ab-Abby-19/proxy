@@ -2,10 +2,23 @@
 import 'package:flutter/material.dart';
 import 'course.dart'; // Import CoursePage
 import 'forgot_password.dart';
+import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 
-class TeacherPage extends StatelessWidget {
-  TextEditingController usernameController = TextEditingController();
+class TeacherPage extends StatefulWidget {
+  @override
+  _TeacherPageState createState() => _TeacherPageState();
+}
+
+class _TeacherPageState extends State<TeacherPage> {
+  TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +36,10 @@ class TeacherPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextField(
-                  controller: usernameController,
+                  controller: emailController,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    labelText: 'Username',
+                    labelText: 'Email',
                     labelStyle: TextStyle(color: Colors.grey),
                   ),
                 ),
@@ -58,15 +71,15 @@ class TeacherPage extends StatelessWidget {
                   ),
                 ),
                 TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ForgotPasswordPage(),
-                  ),
-                );
-              },
-              child: Text('Forgot Password?'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ForgotPasswordPage(),
+                      ),
+                    );
+                  },
+                  child: Text('Forgot Password?'),
                 ),
               ],
             ),
@@ -76,24 +89,63 @@ class TeacherPage extends StatelessWidget {
     );
   }
 
-  void _login(BuildContext context) {
-    String enteredUsername = usernameController.text.toLowerCase().trim();
+  void _login(BuildContext context) async {
+    String enteredEmail = emailController.text.toLowerCase().trim();
     String enteredPassword = passwordController.text.trim();
 
-    if (enteredUsername == 'abc' && enteredPassword == '123') {
-      // Correct credentials, navigate to the teacher portal (replace CoursePage with your actual teacher portal page)
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => CoursePage()),
+    final cookieJar = CookieJar();
+    final dio = Dio();
+    dio.interceptors.add(CookieManager(cookieJar));
+
+    try {
+      Response response = await dio.post(
+        'http://localhost:3000/teacher/login',
+        data: {
+          'email': enteredEmail,
+          'password': enteredPassword,
+        },
       );
-    } else {
-      // Incorrect credentials, show a message
+
+      if (response.statusCode == 200) {
+        String token = response.data['token'];
+        print(token);
+        List<Cookie> cookies = [Cookie('token', token)];
+        await cookieJar.saveFromResponse(
+            Uri.parse('http://localhost:3000/teacher/login'), cookies);
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CoursePage(cookieJar: cookieJar),
+          ),
+        );
+      } else {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Login Failed'),
+              content: Text('Incorrect email or password.'),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      print('Dio error: $e');
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Incorrect Credentials'),
-            content: Text('Please check your username and password.'),
+            title: Text('Network Error'),
+            content: Text('Check your network connection and try again.'),
             actions: [
               ElevatedButton(
                 onPressed: () {

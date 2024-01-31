@@ -1,7 +1,23 @@
+import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:wifi/teacher/course.dart';
 
-class AddCoursePage extends StatelessWidget {
+class AddCoursePage extends StatefulWidget {
+  final CookieJar cookieJar;
+
+  AddCoursePage({required this.cookieJar});
+
+  @override
+  _AddCoursePageState createState() => _AddCoursePageState();
+}
+
+class _AddCoursePageState extends State<AddCoursePage> {
   final TextEditingController subjectCodeController = TextEditingController();
+  final TextEditingController subjectNameController = TextEditingController();
+
+  final cookieJar = CookieJar();
+  final dio = Dio();
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +48,19 @@ class AddCoursePage extends StatelessWidget {
                   labelStyle: TextStyle(color: Colors.grey),
                 ),
               ),
+              Text(
+                'Enter Subject Name:',
+                style: TextStyle(fontSize: 18, color: Colors.white),
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: subjectNameController,
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'Subject Name',
+                  labelStyle: TextStyle(color: Colors.grey),
+                ),
+              ),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
@@ -52,11 +81,37 @@ class AddCoursePage extends StatelessWidget {
     );
   }
 
-  void _submitCourse(BuildContext context) {
-    // Perform any necessary validation or processing
-    // You can store the subject code, show a success message, etc.
+  void _submitCourse(BuildContext context) async {
+    String enteredSubjectCode = subjectCodeController.text.trim();
+    String enteredSubjectName = subjectNameController.text.trim();
 
-    // Navigate back to the previous page (CoursePage)
+    try {
+      List<Cookie> res = await widget.cookieJar
+          .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+      print(res);
+
+      if (res.isNotEmpty) {
+        String token = res.first.value;
+        Response response =
+            await dio.post('http://localhost:3000/teacher/create-course',
+                data: {
+                  'courseCode': enteredSubjectCode,
+                  'courseName': enteredSubjectName,
+                },
+                options: Options(headers: {'Authorization': 'Bearer $token'}));
+        print(response.data);
+        _navigateTo(context, CoursePage(cookieJar: cookieJar));
+      }
+    } catch (e) {
+      print(e);
+    }
     Navigator.pop(context);
+  }
+
+  void _navigateTo(BuildContext context, Widget page) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => page),
+    );
   }
 }

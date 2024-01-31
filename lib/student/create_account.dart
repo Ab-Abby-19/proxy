@@ -1,5 +1,7 @@
 // lib/create_account.dart
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:wifi/student/student.dart';
 
 class CreateAccountPage extends StatefulWidget {
   @override
@@ -14,6 +16,11 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   TextEditingController branchController = TextEditingController();
   TextEditingController yearController = TextEditingController();
   TextEditingController batchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,10 +121,27 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     );
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     // Validate if all fields are filled
     if (_areAllFieldsFilled()) {
       // Redirect to the previous login page
+      final dio = Dio();
+      try {
+        Response response =
+            await dio.post('http://localhost:3000/student/signup', data: {
+          "userName": nameController.text,
+          "email": emailController.text,
+          "password": passwordController.text,
+          "rollNo": rollNumberController.text,
+          "branch": branchController.text,
+          "year": yearController.text,
+          "batch": batchController.text,
+        });
+        print(response.data);
+        _navigateTo(context, StudentPage());
+      } catch (e) {
+        print('Error: $e');
+      }
       Navigator.pop(context);
     } else {
       // Show an error message or take appropriate action
@@ -139,5 +163,12 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         branchController.text.isNotEmpty &&
         yearController.text.isNotEmpty &&
         batchController.text.isNotEmpty;
+  }
+
+  void _navigateTo(BuildContext context, Widget page) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => page),
+    );
   }
 }

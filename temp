@@ -1,0 +1,58 @@
+DataRow(
+          cells: [
+            DataCell(Text('1', style: TextStyle(color: Colors.white))),
+            DataCell(
+              GestureDetector(
+                onTap: () {
+                  _navigateTo(context,
+                      UCT101Page(notificationHelper: NotificationHelper()));
+                },
+                child: Text(
+                  'UCT101',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            DataCell(
+              GestureDetector(
+                onTap: () {
+                  _navigateTo(context, UCT101AttendancePage());
+                },
+                child: Text(
+                  '15/20',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            DataCell(Text('75%', style: TextStyle(color: Colors.white))),
+          ],
+        ),
+        DataRow(
+          cells: [
+            DataCell(Text('2', style: TextStyle(color: Colors.white))),
+            DataCell(
+              GestureDetector(
+                onTap: () {
+                  _navigateTo(context, UCT102Page());
+                },
+                child: Text(
+                  'UCT102',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            DataCell(
+              GestureDetector(
+                onTap: () {
+                  _navigateTo(context, UCT102AttendancePage());
+                },
+                child: Text(
+                  '18/20',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            DataCell(Text('90%', style: TextStyle(color: Colors.white))),
+          ],
+        ),
+        // Add more rows as needed

@@ -1,20 +1,35 @@
 // lib/student/subject.dart
 import 'package:flutter/material.dart';
-import 'package:wifi/utils/notification_helper.dart';
 import 'add_subject.dart'; // Import the necessary add subject page
-import 'uct101.dart'; // Import the necessary UCT101 page
-import 'uct102.dart'; // Import the necessary UCT102 page
 import 'uct101_attendance.dart'; // Import the UCT101 Attendance Page
-import 'uct102_attendance.dart'; // Import the UCT102 Attendance Page
+import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 
 class StudentSubjectPage extends StatefulWidget {
+  final CookieJar cookieJar;
+
+  StudentSubjectPage({required this.cookieJar});
+
   @override
   _StudentSubjectPageState createState() => _StudentSubjectPageState();
 }
 
 class _StudentSubjectPageState extends State<StudentSubjectPage> {
+  late Future<List<Subject>> subjects;
+
+  @override
+  void initState() {
+    super.initState();
+    // subjects = fetchSubjects();
+  }
+
   @override
   Widget build(BuildContext context) {
+    return _buildCoursePage(context);
+  }
+
+  Widget _buildCoursePage(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('List of Courses',
@@ -25,33 +40,47 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
         width: double.infinity,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSubjectTable(context),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  // Navigate to Add Subject Page
-                  _navigateTo(context, AddSubjectPage());
-                },
-                style: ElevatedButton.styleFrom(
-                  primary: Color.fromARGB(255, 1, 11, 45),
-                ),
-                child: Text(
-                  'Join Course',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
-              ),
-            ],
+          child: FutureBuilder<List<Subject>>(
+            future: subjects,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSubjectTable(context, snapshot.data!),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        _navigateTo(
+                            context,
+                            AddSubjectPage(
+                              cookieJar: widget.cookieJar,
+                            ));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Color.fromARGB(255, 1, 11, 45),
+                      ),
+                      child: Text(
+                        'Join Course',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                );
+              }
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSubjectTable(BuildContext context) {
+  Widget _buildSubjectTable(BuildContext context, List<Subject> subjects) {
     return DataTable(
       columnSpacing: 10.0, // Adjust column spacing as needed
       headingTextStyle: TextStyle(
@@ -85,86 +114,101 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Attendance', style: TextStyle(fontSize: 14)),
-            ],
-          ),
-        ),
-        DataColumn(
-          label: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Percentage', style: TextStyle(fontSize: 14)),
+              Text('Subject', style: TextStyle(fontSize: 12)),
+              Text('Name', style: TextStyle(fontSize: 12)),
             ],
           ),
         ),
       ],
-      rows: [
-        DataRow(
+      rows: subjects.map((subject) {
+        return DataRow(
           cells: [
-            DataCell(Text('1', style: TextStyle(color: Colors.white))),
+            DataCell(Text(
+              subject.serial.toString(),
+              style: TextStyle(color: Colors.white),
+            )),
             DataCell(
-              GestureDetector(
-                onTap: () {
-                 _navigateTo(context, UCT101Page(notificationHelper: NotificationHelper()));
-                },
-                child: Text(
-                  'UCT101',
-                  style: TextStyle(color: Colors.white),
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () {
+                    _navigateTo(context, UCT101AttendancePage()); //TODO:
+                  },
+                  child: Text(
+                    subject.courseCode,
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ),
             DataCell(
-              GestureDetector(
-                onTap: () {
-                  _navigateTo(context, UCT101AttendancePage());
-                },
-                child: Text(
-                  '15/20',
-                  style: TextStyle(color: Colors.white),
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () {
+                    _navigateTo(context, UCT101AttendancePage()); //TODO:
+                  },
+                  child: Text(
+                    subject.courseName,
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ),
-            DataCell(Text('75%', style: TextStyle(color: Colors.white))),
           ],
-        ),
-        DataRow(
-          cells: [
-            DataCell(Text('2', style: TextStyle(color: Colors.white))),
-            DataCell(
-              GestureDetector(
-                onTap: () {
-                  _navigateTo(context, UCT102Page());
-                },
-                child: Text(
-                  'UCT102',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-            DataCell(
-              GestureDetector(
-                onTap: () {
-                  _navigateTo(context, UCT102AttendancePage());
-                },
-                child: Text(
-                  '18/20',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-            DataCell(Text('90%', style: TextStyle(color: Colors.white))),
-          ],
-        ),
-        // Add more rows as needed
-      ],
+        );
+      }).toList(),
     );
+  }
+
+  Future<List<Subject>> fetchSubjects() async {
+    try {
+      List<Cookie> res = await widget.cookieJar
+          .loadForRequest(Uri.parse('http://localhost:3000/student/login'));
+      if (res.isNotEmpty) {
+        String token = res.first.value;
+        final dio = Dio();
+        dio.interceptors.add(CookieManager(widget.cookieJar));
+
+        Response response = await dio.get(
+            'http://localhost:3000/student/courses',
+            options: Options(headers: {'Authorization': 'Bearer $token'}));
+        print(response.data);
+        List<dynamic> data = response.data['courses'];
+        List<Subject> subjects =
+            data.map((subject) => Subject.fromJson(subject)).toList();
+        return subjects;
+      } else {
+        throw Exception('Failed to load subjects');
+      }
+    } catch (e) {
+      throw Exception('Failed to load subjects');
+    }
   }
 
   void _navigateTo(BuildContext context, Widget page) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => page),
+    );
+  }
+}
+
+class Subject {
+  final int? serial;
+  final String courseCode;
+  final String courseName;
+
+  Subject(
+      {required this.serial,
+      required this.courseCode,
+      required this.courseName});
+
+  factory Subject.fromJson(Map<String, dynamic> json) {
+    return Subject(
+      serial: json['serial'] as int,
+      courseCode: json['courseCode'],
+      courseName: json['courseName'],
     );
   }
 }

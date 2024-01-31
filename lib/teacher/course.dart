@@ -1,77 +1,112 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'add_course.dart'; // Import the necessary add course page
-import 'uct101.dart'; // Import the necessary UCT101 page
-import 'uct102.dart'; // Import the necessary UCT102 page
+import 'base_course.dart';
 
 class CoursePage extends StatefulWidget {
+  final CookieJar cookieJar;
+
+  CoursePage({required this.cookieJar});
+
   @override
   _CoursePageState createState() => _CoursePageState();
 }
 
 class _CoursePageState extends State<CoursePage> {
-  int selectedCourse = -1; // Track the selected course, -1 means none selected
+  late Future<List<Course>> courses;
+
+  @override
+  void initState() {
+    super.initState();
+    courses = fetchCourses();
+  }
 
   @override
   Widget build(BuildContext context) {
     return _buildCoursePage(context);
   }
 
-  Widget _buildCourseTable(BuildContext context) {
-    return DataTable(
-      headingTextStyle: TextStyle(
-          color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-      columns: [
-        DataColumn(label: Text('Serial Number')),
-        DataColumn(label: Text('Course Code')),
-      ],
-      rows: [
-        DataRow(
-          cells: [
-            DataCell(Text('1', style: TextStyle(color: Colors.white))),
-            DataCell(
-              MouseRegion(
+  Widget _buildCourseTable(BuildContext context, List<Course> courses) {
+    if (courses.isEmpty) {
+      return Text('No courses found',
+          style: TextStyle(color: Colors.white, fontSize: 16));
+    } else {
+      return DataTable(
+        columnSpacing: 10.0,
+        headingTextStyle: TextStyle(
+            color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+        columns: [
+          DataColumn(
+              label: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Serial', style: TextStyle(fontSize: 14)),
+              Text('Number', style: TextStyle(fontSize: 14))
+            ],
+          )),
+          DataColumn(
+              label: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Course', style: TextStyle(fontSize: 14)),
+              Text('Name', style: TextStyle(fontSize: 14))
+            ],
+          )),
+          DataColumn(
+              label: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Join', style: TextStyle(fontSize: 14)),
+              Text('Code', style: TextStyle(fontSize: 14))
+            ],
+          )),
+        ],
+        rows: courses.map((course) {
+          return DataRow(
+            cells: [
+              DataCell(Text(
+                course.serial.toString(),
+                style: TextStyle(color: Colors.white),
+              )),
+              DataCell(MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: GestureDetector(
                   onTap: () {
-                    _navigateTo(context, UCT101Page());
+                    _navigateTo(
+                        context,
+                        BaseCoursePage(
+                          courseCode: course.courseCode.toString(),
+                          cookieJar: widget.cookieJar,
+                        ));
                   },
                   child: Text(
-                    'UCT101',
-                    style: _getCourseTextStyle(1),
+                    course.courseName.toString(),
+                    style: _getCourseTextStyle(),
                   ),
                 ),
-              ),
-            ),
-          ],
-        ),
-        DataRow(
-          cells: [
-            DataCell(Text('2', style: TextStyle(color: Colors.white))),
-            DataCell(
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () {
-                    _navigateTo(context, UCT102Page());
-                  },
-                  child: Text(
-                    'UCT102',
-                    style: _getCourseTextStyle(2),
-                  ),
+              )),
+              DataCell(
+                Text(
+                  course.code,
+                  style: TextStyle(color: Colors.white),
                 ),
-              ),
-            ),
-          ],
-        ),
-        // Add more rows as needed
-      ],
-    );
+              )
+            ],
+          );
+        }).toList(),
+      );
+    }
   }
 
-  TextStyle _getCourseTextStyle(int courseNumber) {
+  TextStyle _getCourseTextStyle() {
     return TextStyle(
       fontSize: 14,
-      color: selectedCourse == courseNumber ? Colors.blue : Colors.white,
+      color: Colors.white,
       decoration: TextDecoration.underline,
     );
   }
@@ -87,26 +122,37 @@ class _CoursePageState extends State<CoursePage> {
         width: double.infinity,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildCourseTable(context),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  // Navigate to Add Course Page
-                  _navigateTo(context, AddCoursePage());
-                },
-                style: ElevatedButton.styleFrom(
-                  primary: Color.fromARGB(255, 1, 11, 45),
-                ),
-                child: Text(
-                  'Add Course',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
-              ),
-            ],
+          child: FutureBuilder<List<Course>>(
+            future: courses,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildCourseTable(context, snapshot.data!),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        _navigateTo(context,
+                            AddCoursePage(cookieJar: widget.cookieJar));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Color.fromARGB(255, 1, 11, 45),
+                      ),
+                      child: Text(
+                        'Add Course',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                );
+              }
+            },
           ),
         ),
       ),
@@ -117,6 +163,59 @@ class _CoursePageState extends State<CoursePage> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => page),
+    );
+  }
+
+  Future<List<Course>> fetchCourses() async {
+    try {
+      List<Cookie> res = await widget.cookieJar
+          .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+      if (res.isNotEmpty) {
+        String token = res.first.value;
+        final dio = Dio();
+        dio.interceptors.add(CookieManager(widget.cookieJar));
+
+        Response response = await dio.get(
+          'http://localhost:3000/teacher/courses',
+          options: Options(headers: {'Authorization': 'Bearer $token'}),
+        );
+        print(response.data);
+        if (response.statusCode == 200) {
+          // print('response: ${response.data['courses']}');
+          List<dynamic> data = response.data['courses'];
+          List<Course> courses =
+              data.map((course) => Course.fromJson(course)).toList();
+          return courses;
+        } else {
+          throw Exception('Failed to load courses');
+        }
+      } else {
+        throw Exception('Failed to load courses');
+      }
+    } catch (e) {
+      throw Exception('Failed to load courses: $e');
+    }
+  }
+}
+
+class Course {
+  final int? serial;
+  final dynamic courseCode;
+  final dynamic code;
+  final dynamic courseName;
+
+  Course(
+      {required this.serial,
+      required this.courseCode,
+      required this.code,
+      required this.courseName});
+
+  factory Course.fromJson(Map<String, dynamic> json) {
+    return Course(
+      serial: json['serial'] as int,
+      courseCode: json['courseCode'],
+      code: json['code'],
+      courseName: json['courseName'],
     );
   }
 }

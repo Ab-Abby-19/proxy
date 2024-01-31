@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 
 class MarkAttendancePage extends StatelessWidget {
+  final String courseCode;
+  final CookieJar cookieJar;
+
+  MarkAttendancePage({required this.courseCode, required this.cookieJar});
+
   TextEditingController rollNumberController = TextEditingController();
 
   @override
@@ -51,12 +59,46 @@ class MarkAttendancePage extends StatelessWidget {
     );
   }
 
-  void _submitRollNumber(BuildContext context) {
+  void _submitRollNumber(BuildContext context) async {
     // Handle the submission logic
     String enteredRollNumber = rollNumberController.text.trim();
 
-    // Here you can implement your logic for marking attendance
-    // For now, let's just navigate back to the previous page
+    if (enteredRollNumber.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please enter a roll number'),
+        ),
+      );
+      return;
+    } else {
+      List<Cookie> res = await cookieJar
+          .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+      if (res.isNotEmpty) {
+        String token = res.first.value;
+        final dio = Dio();
+        dio.interceptors.add(CookieManager(cookieJar));
+
+        Response response =
+            await dio.post('http://localhost:3000/teacher/mark-attendance',
+                data: {
+                  'studentRollNo': enteredRollNumber,
+                  'courseId': courseCode,
+                },
+                options: Options(headers: {
+                  'Authorization': 'Bearer $token',
+                }));
+        print(response.data);
+        _navigateTo(context,
+            MarkAttendancePage(courseCode: courseCode, cookieJar: cookieJar));
+      }
+    }
     Navigator.pop(context);
+  }
+
+  void _navigateTo(BuildContext context, Widget page) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => page),
+    );
   }
 }
