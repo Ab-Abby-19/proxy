@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'generate_code.dart'; // Import the GenerateCodePage
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'mark_attendance.dart';
 
 class UCT102Page extends StatelessWidget {
   final String viewAttendanceUrl = 'YOUR_VIEW_ATTENDANCE_URL_FOR_UCT102';
@@ -21,6 +22,8 @@ class UCT102Page extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildButton(context, 'Generate Code', GenerateCodePage()),
+              SizedBox(height: 20),
+              _buildButton(context, 'Mark Attendance', MarkAttendancePage()),
               SizedBox(height: 20),
               _buildWebViewButton(
                   context, 'View Attendance', viewAttendanceUrl),
