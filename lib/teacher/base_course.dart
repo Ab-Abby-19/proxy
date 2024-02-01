@@ -3,8 +3,6 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'generate_code.dart';
 import 'mark_attendance.dart';
-import 'package:dio/dio.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 
 class BaseCoursePage extends StatelessWidget {
   final String courseCode;

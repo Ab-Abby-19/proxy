@@ -1,8 +1,17 @@
-//TODO:
-
+import 'package:dio/dio.dart';
+import 'package:wifi/teacher/teacher.dart';
 import 'package:flutter/material.dart';
 
-class NewPasswordPage extends StatelessWidget {
+class NewPasswordPage extends StatefulWidget {
+  final String email;
+
+  NewPasswordPage({required this.email});
+
+  @override
+  _NewPasswordPageState createState() => _NewPasswordPageState();
+}
+
+class _NewPasswordPageState extends State<NewPasswordPage> {
   TextEditingController newPasswordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
 
@@ -74,6 +83,44 @@ class NewPasswordPage extends StatelessWidget {
         labelText: labelText,
         labelStyle: TextStyle(color: Colors.grey),
       ),
+    );
+  }
+
+  void _submitForm() async {
+    String newPassword = newPasswordController.text;
+    String confirmPassword = confirmPasswordController.text;
+
+    if (newPassword != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Passwords do not match'),
+        ),
+      );
+      return;
+    }
+
+    try {
+      var dio = Dio();
+      Response response =
+          await dio.post('http://localhost:3000/student/reset-password', data: {
+        'cemail': widget.email,
+        'newPassword': newPassword,
+      });
+      print(response.data);
+      _navigateTo(context, TeacherPage());
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+        ),
+      );
+    }
+  }
+
+  void _navigateTo(BuildContext context, Widget page) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => page),
     );
   }
 }

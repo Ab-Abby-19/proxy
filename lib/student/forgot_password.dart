@@ -1,6 +1,5 @@
-// TODO:
-
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'new_password.dart'; // Import NewPasswordPage
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -13,6 +12,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   TextEditingController otpController = TextEditingController();
 
   bool showEmailField = true;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,18 +47,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ElevatedButton(
                   onPressed: () {
                     if (showEmailField) {
-                      // Handle email submission
-                      // You can implement OTP generation logic here
+                      _submit_email();
                       setState(() {
                         showEmailField = false;
                       });
                     } else {
-                      // Handle OTP submission
-                      // You can implement OTP verification logic here
+                      _submit_otp();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => NewPasswordPage(),
+                          builder: (context) => NewPasswordPage(
+                            email: emailController.text,
+                          ),
                         ),
                       );
                     }
@@ -93,5 +97,32 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         labelStyle: TextStyle(color: Colors.grey),
       ),
     );
+  }
+
+  void _submit_email() async {
+    try {
+      final dio = Dio();
+      Response response =
+          await dio.post('http://localhost:3000/student/send-otp', data: {
+        'email': emailController.text,
+      });
+      print(response.data);
+    } catch (e) {
+      throw Exception('Failed to send OTP');
+    }
+  }
+
+  void _submit_otp() async {
+    try {
+      final dio = Dio();
+      Response response =
+          await dio.post('http://localhost:3000/student/verify-otp', data: {
+        'otp': otpController.text,
+        'email': emailController.text,
+      });
+      print(response.data);
+    } catch (e) {
+      throw Exception('Failed to verify OTP');
+    }
   }
 }

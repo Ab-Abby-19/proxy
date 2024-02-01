@@ -1,7 +1,7 @@
 // lib/student/subject.dart
 import 'package:flutter/material.dart';
+import 'package:wifi/student/mark_attendance.dart';
 import 'add_subject.dart'; // Import the necessary add subject page
-import 'uct101_attendance.dart';
 import 'view_attendance.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
@@ -105,7 +105,11 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: () {
-                      _navigateTo(context, UCT101AttendancePage()); //TODO:
+                      _navigateTo(
+                          context,
+                          MarkAttendancePage(
+                              cookieJar: widget.cookieJar,
+                              subjectCode: subject.courseCode));
                     },
                     child: Text(
                       subject.courseName,
