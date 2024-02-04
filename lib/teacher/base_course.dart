@@ -4,17 +4,27 @@ import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 import 'generate_code.dart';
 import 'mark_attendance.dart';
 
-class BaseCoursePage extends StatelessWidget {
+class BaseCoursePage extends StatefulWidget {
   final String courseCode;
   final CookieJar cookieJar;
 
   BaseCoursePage({required this.courseCode, required this.cookieJar});
 
   @override
+  _BaseCoursePageState createState() => _BaseCoursePageState();
+}
+
+class _BaseCoursePageState extends State<BaseCoursePage> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('$courseCode Page'),
+        title: Text('${widget.courseCode} Page'),
       ),
       body: Center(
         child: Container(
@@ -27,16 +37,16 @@ class BaseCoursePage extends StatelessWidget {
                   context,
                   'Generate Code',
                   GenerateCodePage(
-                    courseCode: courseCode,
-                    cookieJar: cookieJar,
+                    courseCode: widget.courseCode,
+                    cookieJar: widget.cookieJar,
                   )),
               SizedBox(height: 20),
               _buildButton(
                   context,
                   'Mark Attendance',
                   MarkAttendancePage(
-                    courseCode: courseCode,
-                    cookieJar: cookieJar,
+                    courseCode: widget.courseCode,
+                    cookieJar: widget.cookieJar,
                   )),
               SizedBox(height: 20),
               FutureBuilder<String>(
@@ -102,6 +112,9 @@ class BaseCoursePage extends StatelessWidget {
                 title: Text(label),
               ),
               url: url,
+              withLocalStorage: true,
+              withJavascript: true,
+              hidden: true,
             ),
           ),
         );
@@ -129,7 +142,7 @@ class BaseCoursePage extends StatelessWidget {
 
   Future<String> get viewAttendanceUrl async {
     try {
-      List<Cookie> res = await cookieJar
+      List<Cookie> res = await widget.cookieJar
           .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
       if (res.isNotEmpty) {
         String token = res.first.value;
@@ -138,7 +151,7 @@ class BaseCoursePage extends StatelessWidget {
         // dio.interceptors.add(CookieManager(cookieJar));
 
         // Response response = await dio.get('http://localhost:3000/teacher/sheet',
-        //     data: {courseCode: courseCode},
+        //     data: {courseCode: widget.courseCode},
         //     options: Options(headers: {'Authorization': 'Bearer $token'}));
         // String url = response.data['url'];
         String url =

@@ -73,6 +73,15 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
               ],
             ),
           ),
+          DataColumn(
+              label: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Check', style: TextStyle(fontSize: 12)),
+              Text('In', style: TextStyle(fontSize: 12)),
+            ],
+          )),
         ],
         rows: subjects.map((subject) {
           return DataRow(
@@ -85,19 +94,37 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
-                    onTap: () {
-                      _navigateTo(
-                          context,
-                          ViewAttendancePage(
-                            cookieJar: widget.cookieJar,
-                            subjectCode: subject.courseCode,
-                          ));
-                    },
-                    child: Text(
-                      subject.courseCode,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+                      onTap: () {
+                        _navigateTo(
+                            context,
+                            ViewAttendancePage(
+                              cookieJar: widget.cookieJar,
+                              subjectCode: subject.courseCode,
+                            ));
+                      },
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        onEnter: (event) {
+                          setState(() {
+                            subject.isHovered = true;
+                          });
+                        },
+                        onExit: (event) {
+                          setState(() {
+                            subject.isHovered = false;
+                          });
+                        },
+                        child: Text(
+                          subject.courseCode,
+                          style: _getCourseTextStyle(subject.isHovered),
+                        ),
+                      )),
+                ),
+              ),
+              DataCell(
+                Text(
+                  subject.courseName,
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
               DataCell(
@@ -111,9 +138,9 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
                               cookieJar: widget.cookieJar,
                               subjectCode: subject.courseCode));
                     },
-                    child: Text(
-                      subject.courseName,
-                      style: TextStyle(color: Colors.white),
+                    child: Icon(
+                      Icons.add_circle,
+                      color: Colors.green,
                     ),
                   ),
                 ),
@@ -123,6 +150,13 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
         }).toList(),
       );
     }
+  }
+
+  TextStyle _getCourseTextStyle(bool isHovered) {
+    return TextStyle(
+      fontSize: 14,
+      color: isHovered ? Colors.blue : Colors.white,
+    );
   }
 
   Widget _buildCoursePage(BuildContext context) {
@@ -217,17 +251,20 @@ class Subject {
   final int? serial;
   final String courseCode;
   final String courseName;
+  bool isHovered = false;
 
   Subject(
       {required this.serial,
       required this.courseCode,
-      required this.courseName});
+      required this.courseName,
+      required this.isHovered});
 
   factory Subject.fromJson(Map<String, dynamic> json) {
     return Subject(
       serial: json['serial'] ?? 1,
       courseCode: json['courseCode'],
       courseName: json['courseName'],
+      isHovered: false,
     );
   }
 }

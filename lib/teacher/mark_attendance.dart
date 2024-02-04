@@ -9,7 +9,7 @@ class MarkAttendancePage extends StatelessWidget {
 
   MarkAttendancePage({required this.courseCode, required this.cookieJar});
 
-  TextEditingController rollNumberController = TextEditingController();
+  final rollNumberController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +60,6 @@ class MarkAttendancePage extends StatelessWidget {
   }
 
   void _submitRollNumber(BuildContext context) async {
-    // Handle the submission logic
     String enteredRollNumber = rollNumberController.text.trim();
 
     if (enteredRollNumber.isEmpty) {
@@ -73,23 +72,48 @@ class MarkAttendancePage extends StatelessWidget {
     } else {
       List<Cookie> res = await cookieJar
           .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
-      if (res.isNotEmpty) {
-        String token = res.first.value;
-        final dio = Dio();
-        dio.interceptors.add(CookieManager(cookieJar));
+      try {
+        if (res.isNotEmpty) {
+          String token = res.first.value;
+          final dio = Dio();
+          dio.interceptors.add(CookieManager(cookieJar));
 
-        Response response =
-            await dio.post('http://localhost:3000/teacher/mark-attendance',
-                data: {
-                  'studentRollNo': enteredRollNumber,
-                  'courseId': courseCode,
-                },
-                options: Options(headers: {
-                  'Authorization': 'Bearer $token',
-                }));
-        print(response.data);
-        _navigateTo(context,
-            MarkAttendancePage(courseCode: courseCode, cookieJar: cookieJar));
+          Response response =
+              await dio.post('http://localhost:3000/teacher/mark-attendance',
+                  data: {
+                    'studentRollNo': enteredRollNumber,
+                    'courseId': courseCode,
+                  },
+                  options: Options(headers: {
+                    'Authorization': 'Bearer $token',
+                  }));
+          print(response.data);
+          if (response.statusCode == 200) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Attendance marked successfully'),
+              ),
+            );
+          } else if (response.statusCode == 201) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Already marked attendance for this roll number'),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to mark attendance'),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to mark attendance: $e'),
+          ),
+        );
       }
     }
     Navigator.pop(context);

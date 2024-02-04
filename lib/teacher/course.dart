@@ -84,9 +84,22 @@ class _CoursePageState extends State<CoursePage> {
                           cookieJar: widget.cookieJar,
                         ));
                   },
-                  child: Text(
-                    course.courseName.toString(),
-                    style: _getCourseTextStyle(),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    onEnter: (event) {
+                      setState(() {
+                        course.isHovered = true;
+                      });
+                    },
+                    onExit: (event) {
+                      setState(() {
+                        course.isHovered = false;
+                      });
+                    },
+                    child: Text(
+                      course.courseName.toString(),
+                      style: _getCourseTextStyle(course.isHovered),
+                    ),
                   ),
                 ),
               )),
@@ -103,10 +116,10 @@ class _CoursePageState extends State<CoursePage> {
     }
   }
 
-  TextStyle _getCourseTextStyle() {
+  TextStyle _getCourseTextStyle(bool isHovered) {
     return TextStyle(
       fontSize: 14,
-      color: Colors.white,
+      color: isHovered ? Colors.blue : Colors.white,
       decoration: TextDecoration.underline,
     );
   }
@@ -203,12 +216,14 @@ class Course {
   final dynamic courseCode;
   final dynamic code;
   final dynamic courseName;
+  bool isHovered = false;
 
   Course(
       {required this.serial,
       required this.courseCode,
       required this.code,
-      required this.courseName});
+      required this.courseName,
+      required this.isHovered});
 
   factory Course.fromJson(Map<String, dynamic> json) {
     return Course(
@@ -216,6 +231,7 @@ class Course {
       courseCode: json['courseCode'],
       code: json['code'],
       courseName: json['courseName'],
+      isHovered: false,
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:location/location.dart';
 import 'package:network_info_plus/network_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:wifi/student/view_attendance.dart';
 
 class MarkAttendancePage extends StatefulWidget {
@@ -97,10 +98,29 @@ class _MarkAttendancePageState extends State<MarkAttendancePage> {
           }),
         );
         print(response.data);
-        _navigateTo(
-            context,
-            ViewAttendancePage(
-                cookieJar: widget.cookieJar, subjectCode: widget.subjectCode));
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Attendance marked successfully'),
+            ),
+          );
+        } else if (response.statusCode == 201) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Session is off'),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.data['message']),
+            ),
+          );
+        }
+        // _navigateTo(
+        //     context,
+        //     ViewAttendancePage(
+        //         cookieJar: widget.cookieJar, subjectCode: widget.subjectCode));
       }
     } catch (e) {
       print('Error: $e');

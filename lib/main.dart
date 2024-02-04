@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Proxy Marker',
+      title: 'ProXi',
       theme: ThemeData(
         primaryColor: Color.fromARGB(255, 8, 8, 9),
         colorScheme: ColorScheme.fromSwatch().copyWith(
@@ -36,27 +36,16 @@ class MainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Proxy Marker'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            image: DecorationImage(
-              image: AssetImage(
-                  'assets/your_logo.png'), // Replace with your logo image
-              fit: BoxFit.contain,
-            ),
-          ),
+        title: Text('ProXi'),
+        leading: Container(
+          margin: EdgeInsets.all(7),
+          child: Image.asset('images/app_logo.png', fit: BoxFit.contain),
         ),
       ),
       body: Center(
         child: Container(
           decoration: BoxDecoration(
             color: const Color.fromARGB(255, 8, 8, 8),
-            image: DecorationImage(
-              image: AssetImage(
-                  'assets/background_image.png'), // Replace with your background image
-              fit: BoxFit.cover,
-            ),
           ),
           width: double.infinity,
           child: Column(

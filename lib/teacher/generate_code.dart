@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/material.dart';
@@ -25,13 +24,14 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
   String _addr = 'wlp2s0';
   double? _latitude = 51.507351;
   double? _longitude = -0.127758;
-  late Future<String> _generateCodeFuture;
+  String _code = '';
+  bool sessionWorking = true;
 
   @override
   void initState() {
     super.initState();
     _startTimer();
-    _generateCodeFuture = _generateRandomCode();
+    _generateRandomCode();
     // _getNetworkInfo();
     // _getLocation();
     // _requestLocationPermission();
@@ -39,66 +39,75 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Generate Code', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
-      ),
-      body: Container(
-        decoration: BoxDecoration(color: const Color.fromARGB(255, 8, 8, 8)),
-        width: double.infinity,
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                'Generated Code:',
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
-              SizedBox(height: 10),
-              FutureBuilder(
-                  future: _generateCodeFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else {
-                      return Text(
-                        snapshot.data ?? '',
-                        style: TextStyle(fontSize: 24, color: Colors.white),
-                      );
-                    }
-                  }),
-              SizedBox(height: 20),
-              Text(
-                'Remaining Time: $_remainingTime seconds',
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  _stopTimer();
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.red,
-                ),
-                child: Text(
-                  'Stop',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
-              ),
-            ],
+    if (!sessionWorking) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Already have a session'),
+          leading: Container(
+            margin: EdgeInsets.all(7),
+            child: Image.asset('images/app_logo.png', fit: BoxFit.contain),
           ),
         ),
-      ),
-    );
+        body: Center(
+          child: Text('You already have a session running'),
+        ),
+      );
+    } else {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Generate Code', style: TextStyle(color: Colors.black)),
+          backgroundColor: Colors.white,
+          leading: Container(
+            margin: EdgeInsets.all(7),
+            child: Image.asset('images/app_logo.png', fit: BoxFit.contain),
+          ),
+        ),
+        body: Container(
+          decoration: BoxDecoration(color: const Color.fromARGB(255, 8, 8, 8)),
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'Generated Code:',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  _code,
+                  style: TextStyle(fontSize: 24, color: Colors.white),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'Remaining Time: $_remainingTime seconds',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    _stopTimer();
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.red,
+                  ),
+                  child: Text(
+                    'Stop',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
   }
 
-  Future<String> _generateRandomCode() async {
+  void _generateRandomCode() async {
     try {
       var dio = Dio();
       dio.interceptors.add(CookieManager(widget.cookieJar));
@@ -120,11 +129,18 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
           },
           options: Options(headers: {'Authorization': 'Bearer $token'}),
         );
-        print(response.data);
-        String code = response.data['code'];
-        return code;
+        // print(response.data);
+        if (response.statusCode == 401) {
+          setState(() {
+            sessionWorking = false;
+          });
+          return;
+        }
+        String code = response.data['code'].toString();
+        setState(() {
+          _code = code;
+        });
       }
-      return '';
     } catch (e) {
       throw Exception('Failed to generate random code: $e');
     }
@@ -157,7 +173,7 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
           Response response =
               await dio.post('http://localhost:3000/teacher/stop-session',
                   data: {
-                    'courseID': widget.courseCode,
+                    'sessionCode': _code,
                   },
                   options: Options(headers: {
                     'Authorization': 'Bearer $token',

@@ -44,6 +44,7 @@ dependencies:
   permission_handler: ^11.2.0
   location: ^5.0.3
   fl_chart: ^0.66.1
+  webview_flutter: ^4.5.0
 
 dev_dependencies:
   flutter_test:
@@ -68,8 +69,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - images/app_logo.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
