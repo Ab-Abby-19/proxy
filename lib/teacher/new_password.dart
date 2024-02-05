@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:wifi/teacher/teacher.dart';
+import 'package:wifi/main.dart';
 import 'package:flutter/material.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 
 class NewPasswordPage extends StatefulWidget {
   final String email;
@@ -107,7 +108,8 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
         'newPassword': newPassword,
       });
       print(response.data);
-      _navigateTo(context, TeacherPage());
+      final cookieJar = CookieJar();
+      _navigateTo(context, MainPage(cookieJar: cookieJar));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

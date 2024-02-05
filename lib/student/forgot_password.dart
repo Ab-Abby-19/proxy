@@ -1,8 +1,13 @@
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'new_password.dart'; // Import NewPasswordPage
 
 class ForgotPasswordPage extends StatefulWidget {
+  final CookieJar cookieJar;
+
+  ForgotPasswordPage({required this.cookieJar});
+
   @override
   _ForgotPasswordPageState createState() => _ForgotPasswordPageState();
 }
@@ -58,6 +63,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         MaterialPageRoute(
                           builder: (context) => NewPasswordPage(
                             email: emailController.text,
+                            cookieJar: widget.cookieJar,
                           ),
                         ),
                       );

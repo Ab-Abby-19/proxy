@@ -7,6 +7,10 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 
 class TeacherPage extends StatefulWidget {
+  final CookieJar cookieJar;
+
+  TeacherPage({required this.cookieJar});
+
   @override
   _TeacherPageState createState() => _TeacherPageState();
 }
@@ -18,6 +22,7 @@ class _TeacherPageState extends State<TeacherPage> {
   @override
   void initState() {
     super.initState();
+    _checkLoggedIn(context);
   }
 
   @override
@@ -158,5 +163,29 @@ class _TeacherPageState extends State<TeacherPage> {
         },
       );
     }
+  }
+
+  void _checkLoggedIn(BuildContext context) async {
+    final cookieJar = CookieJar();
+    final dio = Dio();
+    dio.interceptors.add(CookieManager(cookieJar));
+
+    try {
+      List<Cookie> cookies = await cookieJar
+          .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+      print(cookies);
+      if (cookies.isNotEmpty) {
+        _navigateTo(context, CoursePage(cookieJar: cookieJar));
+      }
+    } catch (e) {
+      print('Dio error: $e');
+    }
+  }
+
+  void _navigateTo(BuildContext context, Widget page) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => page),
+    );
   }
 }

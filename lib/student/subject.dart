@@ -1,5 +1,6 @@
 // lib/student/subject.dart
 import 'package:flutter/material.dart';
+import 'package:wifi/main.dart';
 import 'package:wifi/student/mark_attendance.dart';
 import 'add_subject.dart'; // Import the necessary add subject page
 import 'view_attendance.dart';
@@ -164,6 +165,12 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
       appBar: AppBar(
         title: Text('List of Courses',
             style: TextStyle(color: const Color.fromARGB(255, 16, 16, 16))),
+        leading: IconButton(
+          icon: Icon(Icons.logout),
+          onPressed: () {
+            _logout(context);
+          },
+        ),
       ),
       body: Container(
         decoration: BoxDecoration(color: const Color.fromARGB(255, 8, 8, 8)),
@@ -244,6 +251,18 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
       context,
       MaterialPageRoute(builder: (context) => page),
     );
+  }
+
+  void _logout(BuildContext context) async {
+    try {
+      await widget.cookieJar.deleteAll();
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MainPage(cookieJar: widget.cookieJar)));
+    } catch (e) {
+      throw Exception('Error logging out: $e');
+    }
   }
 }
 

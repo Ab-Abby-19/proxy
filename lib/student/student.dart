@@ -8,6 +8,10 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 
 class StudentPage extends StatefulWidget {
+  final CookieJar cookieJar;
+
+  StudentPage({required this.cookieJar});
+
   @override
   _StudentPageState createState() => _StudentPageState();
 }
@@ -75,7 +79,8 @@ class _StudentPageState extends State<StudentPage> {
                 TextButton(
                   onPressed: () {
                     // Navigate to Forgot Password Page
-                    _navigateTo(context, ForgotPasswordPage());
+                    _navigateTo(context,
+                        ForgotPasswordPage(cookieJar: widget.cookieJar));
                   },
                   child: Text(
                     'Forgot Password?',
@@ -85,7 +90,8 @@ class _StudentPageState extends State<StudentPage> {
                 TextButton(
                   onPressed: () {
                     // Navigate to Create Account Page
-                    _navigateTo(context, CreateAccountPage());
+                    _navigateTo(context,
+                        CreateAccountPage(cookieJar: widget.cookieJar));
                   },
                   child: Text(
                     'Sign Up',

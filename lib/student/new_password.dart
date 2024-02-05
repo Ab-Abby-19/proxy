@@ -1,11 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:wifi/student/student.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 
 class NewPasswordPage extends StatefulWidget {
   final String email;
+  final CookieJar cookieJar;
 
-  NewPasswordPage({required this.email});
+  NewPasswordPage({required this.email, required this.cookieJar});
 
   @override
   _NewPasswordPageState createState() => _NewPasswordPageState();
@@ -107,7 +109,11 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
         'newPassword': newPassword,
       });
       print(response.data);
-      _navigateTo(context, StudentPage());
+      _navigateTo(
+          context,
+          StudentPage(
+            cookieJar: widget.cookieJar,
+          ));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

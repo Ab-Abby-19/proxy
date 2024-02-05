@@ -1,9 +1,14 @@
 // lib/create_account.dart
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:wifi/student/student.dart';
 
 class CreateAccountPage extends StatefulWidget {
+  final CookieJar cookieJar;
+
+  CreateAccountPage({required this.cookieJar});
+
   @override
   _CreateAccountPageState createState() => _CreateAccountPageState();
 }
@@ -138,7 +143,11 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
           "batch": batchController.text,
         });
         print(response.data);
-        _navigateTo(context, StudentPage());
+        _navigateTo(
+            context,
+            StudentPage(
+              cookieJar: widget.cookieJar,
+            ));
       } catch (e) {
         print('Error: $e');
       }

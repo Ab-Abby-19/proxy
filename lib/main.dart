@@ -3,13 +3,19 @@ import 'teacher/teacher.dart';
 import 'student/student.dart';
 import 'admin/admin.dart';
 import 'utils/notification_helper.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   final NotificationHelper notificationHelper = NotificationHelper();
+  final CookieJar? cookieJar;
+
+  MyApp({this.cookieJar});
 
   @override
   Widget build(BuildContext context) {
@@ -21,16 +27,32 @@ class MyApp extends StatelessWidget {
           secondary: Color.fromARGB(255, 23, 23, 24),
         ),
       ),
-      home: MainPage(notificationHelper: notificationHelper),
+      home: MainPage(
+          // notificationHelper: notificationHelper,
+          cookieJar: cookieJar ?? CookieJar()),
     );
   }
 }
 
-class MainPage extends StatelessWidget {
-  final NotificationHelper notificationHelper;
+class MainPage extends StatefulWidget {
+  final CookieJar cookieJar;
+  // final NotificationHelper notificationHelper;
 
   // Constructor
-  MainPage({required this.notificationHelper});
+  MainPage({required this.cookieJar});
+  // MainPage({required this.notificationHelper, required this.cookieJar});
+
+  @override
+  _MainPageState createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  @override
+  void initState() {
+    super.initState();
+    _checkLoggedIn(context);
+    // widget.notificationHelper.configureSelectNotificationSubject(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +73,11 @@ class MainPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildButton(context, 'TEACHER', TeacherPage()),
+              _buildButton(
+                  context, 'TEACHER', TeacherPage(cookieJar: widget.cookieJar)),
               SizedBox(height: 20),
-              _buildButton(context, 'STUDENT', StudentPage()),
+              _buildButton(
+                  context, 'STUDENT', StudentPage(cookieJar: widget.cookieJar)),
               SizedBox(height: 20),
               _buildButton(context, 'ADMIN', AdminPage()),
             ],
@@ -104,5 +128,22 @@ class MainPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _checkLoggedIn(BuildContext context) async {
+    try {
+      List<Cookie> cookies = await widget.cookieJar
+          .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+      print(cookies);
+      if (cookies.isNotEmpty) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => TeacherPage(cookieJar: widget.cookieJar)),
+        );
+      }
+    } catch (e) {
+      throw Exception('Error checking if user is logged in: $e');
+    }
   }
 }

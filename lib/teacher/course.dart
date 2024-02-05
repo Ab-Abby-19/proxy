@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:wifi/main.dart';
 import 'add_course.dart'; // Import the necessary add course page
 import 'base_course.dart';
 
@@ -127,8 +128,13 @@ class _CoursePageState extends State<CoursePage> {
   Widget _buildCoursePage(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('List of Courses',
-            style: TextStyle(color: const Color.fromARGB(255, 16, 16, 16))),
+        title: Text('List of Courses'),
+        leading: IconButton(
+          icon: Icon(Icons.logout),
+          onPressed: () {
+            _logout(context);
+          },
+        ),
       ),
       body: Container(
         decoration: BoxDecoration(color: const Color.fromARGB(255, 8, 8, 8)),
@@ -207,6 +213,20 @@ class _CoursePageState extends State<CoursePage> {
       }
     } catch (e) {
       throw Exception('Failed to load courses: $e');
+    }
+  }
+
+  void _logout(BuildContext context) async {
+    try {
+      await widget.cookieJar.deleteAll();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainPage(cookieJar: widget.cookieJar),
+        ),
+      );
+    } catch (e) {
+      throw Exception('Error logging out: $e');
     }
   }
 }

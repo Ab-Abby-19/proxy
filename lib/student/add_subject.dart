@@ -77,7 +77,7 @@ class _AddSubjectPageState extends State<AddSubjectPage> {
                 },
                 options: Options(headers: {"Authorization": "Bearer $token"}));
         print(response.data);
-        _navigateTo(context, StudentSubjectPage(cookieJar: cookieJar));
+        _navigateTo(context, StudentSubjectPage(cookieJar: widget.cookieJar));
       }
     } catch (e) {
       print(e);
