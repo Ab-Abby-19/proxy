@@ -6,8 +6,9 @@ import 'package:cookie_jar/cookie_jar.dart';
 
 class TeacherDetailsPage extends StatelessWidget {
   final CookieJar cookieJar;
+  final String apiUrl;
 
-  TeacherDetailsPage({required this.cookieJar});
+  TeacherDetailsPage({required this.cookieJar, required this.apiUrl});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,6 +30,7 @@ class TeacherDetailsPage extends StatelessWidget {
                         context,
                         AddTeacherPage(
                           cookieJar: cookieJar,
+                          apiUrl: apiUrl,
                         ));
                   },
                   style: ElevatedButton.styleFrom(
@@ -50,6 +52,7 @@ class TeacherDetailsPage extends StatelessWidget {
                         context,
                         ListTeachersPage(
                           cookieJar: cookieJar,
+                          apiUrl: apiUrl,
                         ));
                   },
                   style: ElevatedButton.styleFrom(

@@ -5,6 +5,10 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 
 class AdminPage extends StatefulWidget {
+  final String apiUrl;
+
+  AdminPage({required this.apiUrl});
+
   @override
   _AdminPageState createState() => _AdminPageState();
 }
@@ -89,12 +93,15 @@ class _AdminPageState extends State<AdminPage> {
 
     print('checkubng');
     List<Cookie> cookies = await cookieJar
-        .loadForRequest(Uri.parse('http://localhost:3000/admin/login'));
+        .loadForRequest(Uri.parse('${widget.apiUrl}/admin/login'));
     if (cookies.isNotEmpty) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-            builder: (context) => TeacherDetailsPage(cookieJar: cookieJar)),
+            builder: (context) => TeacherDetailsPage(
+                  cookieJar: cookieJar,
+                  apiUrl: widget.apiUrl,
+                )),
       );
     }
   }
@@ -111,7 +118,7 @@ class _AdminPageState extends State<AdminPage> {
     print('Password: $enteredPassword');
     try {
       Response response = await dio.post(
-        'http://localhost:3000/admin/login',
+        '${widget.apiUrl}/admin/login',
         data: {
           'email': enteredEmail,
           'password': enteredPassword,
@@ -125,12 +132,15 @@ class _AdminPageState extends State<AdminPage> {
         print(token);
         List<Cookie> cookies = [Cookie('token', token)];
         await cookieJar.saveFromResponse(
-            Uri.parse('http://localhost:3000/admin/login'), cookies);
+            Uri.parse('${widget.apiUrl}/admin/login'), cookies);
 
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => TeacherDetailsPage(cookieJar: cookieJar)),
+              builder: (context) => TeacherDetailsPage(
+                    cookieJar: cookieJar,
+                    apiUrl: widget.apiUrl,
+                  )),
         );
       } else {
         print('Login failed');

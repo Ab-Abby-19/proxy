@@ -8,8 +8,9 @@ import 'base_course.dart';
 
 class CoursePage extends StatefulWidget {
   final CookieJar cookieJar;
+  final String apiUrl;
 
-  CoursePage({required this.cookieJar});
+  CoursePage({required this.cookieJar, required this.apiUrl});
 
   @override
   _CoursePageState createState() => _CoursePageState();
@@ -83,6 +84,7 @@ class _CoursePageState extends State<CoursePage> {
                         BaseCoursePage(
                           courseCode: course.courseCode.toString(),
                           cookieJar: widget.cookieJar,
+                          apiUrl: widget.apiUrl,
                         ));
                   },
                   child: MouseRegion(
@@ -157,8 +159,11 @@ class _CoursePageState extends State<CoursePage> {
                     SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        _navigateTo(context,
-                            AddCoursePage(cookieJar: widget.cookieJar));
+                        _navigateTo(
+                            context,
+                            AddCoursePage(
+                                cookieJar: widget.cookieJar,
+                                apiUrl: widget.apiUrl));
                       },
                       style: ElevatedButton.styleFrom(
                         primary: Color.fromARGB(255, 1, 11, 45),
@@ -188,14 +193,14 @@ class _CoursePageState extends State<CoursePage> {
   Future<List<Course>> fetchCourses() async {
     try {
       List<Cookie> res = await widget.cookieJar
-          .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+          .loadForRequest(Uri.parse('${widget.apiUrl}/teacher/login'));
       if (res.isNotEmpty) {
         String token = res.first.value;
         final dio = Dio();
         dio.interceptors.add(CookieManager(widget.cookieJar));
 
         Response response = await dio.get(
-          'http://localhost:3000/teacher/courses',
+          '${widget.apiUrl}/teacher/courses',
           options: Options(headers: {'Authorization': 'Bearer $token'}),
         );
         print(response.data);

@@ -5,17 +5,20 @@ import 'admin/admin.dart';
 import 'utils/notification_helper.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 
-void main() async {
+const String API_URL = 'https://48c9-112-196-126-3.ngrok-free.app';
+
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(MyApp());
+  runApp(MyApp(apiUrl: API_URL));
 }
 
 class MyApp extends StatelessWidget {
   final NotificationHelper notificationHelper = NotificationHelper();
   final CookieJar? cookieJar;
+  final String apiUrl;
 
-  MyApp({this.cookieJar});
+  MyApp({this.cookieJar, required this.apiUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +41,6 @@ class MainPage extends StatefulWidget {
   final CookieJar cookieJar;
   // final NotificationHelper notificationHelper;
 
-  // Constructor
   MainPage({required this.cookieJar});
   // MainPage({required this.notificationHelper, required this.cookieJar});
 
@@ -73,13 +75,13 @@ class _MainPageState extends State<MainPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildButton(
-                  context, 'TEACHER', TeacherPage(cookieJar: widget.cookieJar)),
+              _buildButton(context, 'TEACHER',
+                  TeacherPage(cookieJar: widget.cookieJar, apiUrl: API_URL)),
               SizedBox(height: 20),
-              _buildButton(
-                  context, 'STUDENT', StudentPage(cookieJar: widget.cookieJar)),
+              _buildButton(context, 'STUDENT',
+                  StudentPage(cookieJar: widget.cookieJar, apiUrl: API_URL)),
               SizedBox(height: 20),
-              _buildButton(context, 'ADMIN', AdminPage()),
+              _buildButton(context, 'ADMIN', AdminPage(apiUrl: API_URL)),
             ],
           ),
         ),
@@ -133,13 +135,14 @@ class _MainPageState extends State<MainPage> {
   void _checkLoggedIn(BuildContext context) async {
     try {
       List<Cookie> cookies = await widget.cookieJar
-          .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+          .loadForRequest(Uri.parse('${API_URL}/teacher/login'));
       print(cookies);
       if (cookies.isNotEmpty) {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => TeacherPage(cookieJar: widget.cookieJar)),
+              builder: (context) =>
+                  TeacherPage(cookieJar: widget.cookieJar, apiUrl: API_URL)),
         );
       }
     } catch (e) {

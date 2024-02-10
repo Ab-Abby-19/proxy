@@ -8,8 +8,9 @@ import 'package:cookie_jar/cookie_jar.dart';
 
 class TeacherPage extends StatefulWidget {
   final CookieJar cookieJar;
+  final String apiUrl;
 
-  TeacherPage({required this.cookieJar});
+  TeacherPage({required this.cookieJar, required this.apiUrl});
 
   @override
   _TeacherPageState createState() => _TeacherPageState();
@@ -80,7 +81,9 @@ class _TeacherPageState extends State<TeacherPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ForgotPasswordPage(),
+                        builder: (context) => ForgotPasswordPage(
+                          apiUrl: widget.apiUrl,
+                        ),
                       ),
                     );
                   },
@@ -104,7 +107,7 @@ class _TeacherPageState extends State<TeacherPage> {
 
     try {
       Response response = await dio.post(
-        'http://localhost:3000/teacher/login',
+        '${widget.apiUrl}/teacher/login',
         data: {
           'email': enteredEmail,
           'password': enteredPassword,
@@ -116,12 +119,13 @@ class _TeacherPageState extends State<TeacherPage> {
         print(token);
         List<Cookie> cookies = [Cookie('token', token)];
         await cookieJar.saveFromResponse(
-            Uri.parse('http://localhost:3000/teacher/login'), cookies);
+            Uri.parse('${widget.apiUrl}/teacher/login'), cookies);
 
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => CoursePage(cookieJar: cookieJar),
+            builder: (context) =>
+                CoursePage(cookieJar: cookieJar, apiUrl: widget.apiUrl),
           ),
         );
       } else {
@@ -172,10 +176,11 @@ class _TeacherPageState extends State<TeacherPage> {
 
     try {
       List<Cookie> cookies = await cookieJar
-          .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+          .loadForRequest(Uri.parse('${widget.apiUrl}/teacher/login'));
       print(cookies);
       if (cookies.isNotEmpty) {
-        _navigateTo(context, CoursePage(cookieJar: cookieJar));
+        _navigateTo(
+            context, CoursePage(cookieJar: cookieJar, apiUrl: widget.apiUrl));
       }
     } catch (e) {
       print('Dio error: $e');

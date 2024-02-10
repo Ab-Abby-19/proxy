@@ -5,8 +5,9 @@ import 'package:wifi/teacher/course.dart';
 
 class AddCoursePage extends StatefulWidget {
   final CookieJar cookieJar;
+  final String apiUrl;
 
-  AddCoursePage({required this.cookieJar});
+  AddCoursePage({required this.cookieJar, required this.apiUrl});
 
   @override
   _AddCoursePageState createState() => _AddCoursePageState();
@@ -87,20 +88,21 @@ class _AddCoursePageState extends State<AddCoursePage> {
 
     try {
       List<Cookie> res = await widget.cookieJar
-          .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+          .loadForRequest(Uri.parse('${widget.apiUrl}/teacher/login'));
       print(res);
 
       if (res.isNotEmpty) {
         String token = res.first.value;
         Response response =
-            await dio.post('http://localhost:3000/teacher/create-course',
+            await dio.post('${widget.apiUrl}/teacher/create-course',
                 data: {
                   'courseCode': enteredSubjectCode,
                   'courseName': enteredSubjectName,
                 },
                 options: Options(headers: {'Authorization': 'Bearer $token'}));
         print(response.data);
-        _navigateTo(context, CoursePage(cookieJar: cookieJar));
+        _navigateTo(
+            context, CoursePage(cookieJar: cookieJar, apiUrl: widget.apiUrl));
       }
     } catch (e) {
       print(e);

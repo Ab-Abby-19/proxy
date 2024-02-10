@@ -9,8 +9,9 @@ import 'package:cookie_jar/cookie_jar.dart';
 
 class StudentPage extends StatefulWidget {
   final CookieJar cookieJar;
+  final String apiUrl;
 
-  StudentPage({required this.cookieJar});
+  StudentPage({required this.cookieJar, required this.apiUrl});
 
   @override
   _StudentPageState createState() => _StudentPageState();
@@ -79,8 +80,11 @@ class _StudentPageState extends State<StudentPage> {
                 TextButton(
                   onPressed: () {
                     // Navigate to Forgot Password Page
-                    _navigateTo(context,
-                        ForgotPasswordPage(cookieJar: widget.cookieJar));
+                    _navigateTo(
+                        context,
+                        ForgotPasswordPage(
+                            cookieJar: widget.cookieJar,
+                            apiUrl: widget.apiUrl));
                   },
                   child: Text(
                     'Forgot Password?',
@@ -90,8 +94,11 @@ class _StudentPageState extends State<StudentPage> {
                 TextButton(
                   onPressed: () {
                     // Navigate to Create Account Page
-                    _navigateTo(context,
-                        CreateAccountPage(cookieJar: widget.cookieJar));
+                    _navigateTo(
+                        context,
+                        CreateAccountPage(
+                            cookieJar: widget.cookieJar,
+                            apiUrl: widget.apiUrl));
                   },
                   child: Text(
                     'Sign Up',
@@ -116,7 +123,7 @@ class _StudentPageState extends State<StudentPage> {
 
     try {
       Response response =
-          await dio.post('http://localhost:3000/student/login', data: {
+          await dio.post('${widget.apiUrl}/student/login', data: {
         'email': enteredEmail,
         'password': enteredPassword,
       });
@@ -124,12 +131,13 @@ class _StudentPageState extends State<StudentPage> {
       String token = response.data['token'];
       List<Cookie> cookies = [Cookie('token', token)];
       await cookieJar.saveFromResponse(
-          Uri.parse('http://localhost:3000/student/login'), cookies);
+          Uri.parse('${widget.apiUrl}/student/login'), cookies);
 
       _navigateTo(
           context,
           StudentSubjectPage(
             cookieJar: cookieJar,
+            apiUrl: widget.apiUrl,
           ));
     } catch (e) {
       print('Dio error: $e');

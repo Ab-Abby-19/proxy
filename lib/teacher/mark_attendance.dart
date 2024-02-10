@@ -6,8 +6,12 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 class MarkAttendancePage extends StatelessWidget {
   final String courseCode;
   final CookieJar cookieJar;
+  final String apiUrl;
 
-  MarkAttendancePage({required this.courseCode, required this.cookieJar});
+  MarkAttendancePage(
+      {required this.courseCode,
+      required this.cookieJar,
+      required this.apiUrl});
 
   final rollNumberController = TextEditingController();
 
@@ -70,8 +74,8 @@ class MarkAttendancePage extends StatelessWidget {
       );
       return;
     } else {
-      List<Cookie> res = await cookieJar
-          .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+      List<Cookie> res =
+          await cookieJar.loadForRequest(Uri.parse('${apiUrl}/teacher/login'));
       try {
         if (res.isNotEmpty) {
           String token = res.first.value;
@@ -79,7 +83,7 @@ class MarkAttendancePage extends StatelessWidget {
           dio.interceptors.add(CookieManager(cookieJar));
 
           Response response =
-              await dio.post('http://localhost:3000/teacher/mark-attendance',
+              await dio.post('${apiUrl}/teacher/mark-attendance',
                   data: {
                     'studentRollNo': enteredRollNumber,
                     'courseId': courseCode,

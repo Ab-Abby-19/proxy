@@ -6,8 +6,10 @@ import 'package:cookie_jar/cookie_jar.dart';
 class NewPasswordPage extends StatefulWidget {
   final String email;
   final CookieJar cookieJar;
+  final String apiUrl;
 
-  NewPasswordPage({required this.email, required this.cookieJar});
+  NewPasswordPage(
+      {required this.email, required this.cookieJar, required this.apiUrl});
 
   @override
   _NewPasswordPageState createState() => _NewPasswordPageState();
@@ -104,7 +106,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
     try {
       var dio = Dio();
       Response response =
-          await dio.post('http://localhost:3000/student/reset-password', data: {
+          await dio.post('${widget.apiUrl}/student/reset-password', data: {
         'cemail': widget.email,
         'newPassword': newPassword,
       });
@@ -113,6 +115,7 @@ class _NewPasswordPageState extends State<NewPasswordPage> {
           context,
           StudentPage(
             cookieJar: widget.cookieJar,
+            apiUrl: widget.apiUrl,
           ));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

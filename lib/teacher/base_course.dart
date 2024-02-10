@@ -7,8 +7,12 @@ import 'mark_attendance.dart';
 class BaseCoursePage extends StatefulWidget {
   final String courseCode;
   final CookieJar cookieJar;
+  final String apiUrl;
 
-  BaseCoursePage({required this.courseCode, required this.cookieJar});
+  BaseCoursePage(
+      {required this.courseCode,
+      required this.cookieJar,
+      required this.apiUrl});
 
   @override
   _BaseCoursePageState createState() => _BaseCoursePageState();
@@ -39,6 +43,7 @@ class _BaseCoursePageState extends State<BaseCoursePage> {
                   GenerateCodePage(
                     courseCode: widget.courseCode,
                     cookieJar: widget.cookieJar,
+                    apiUrl: widget.apiUrl,
                   )),
               SizedBox(height: 20),
               _buildButton(
@@ -47,6 +52,7 @@ class _BaseCoursePageState extends State<BaseCoursePage> {
                   MarkAttendancePage(
                     courseCode: widget.courseCode,
                     cookieJar: widget.cookieJar,
+                    apiUrl: widget.apiUrl,
                   )),
               SizedBox(height: 20),
               FutureBuilder<String>(
@@ -143,14 +149,14 @@ class _BaseCoursePageState extends State<BaseCoursePage> {
   Future<String> get viewAttendanceUrl async {
     try {
       List<Cookie> res = await widget.cookieJar
-          .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+          .loadForRequest(Uri.parse('${widget.apiUrl}/teacher/login'));
       if (res.isNotEmpty) {
         String token = res.first.value;
         print('token: $token');
         // final dio = Dio();
         // dio.interceptors.add(CookieManager(cookieJar));
 
-        // Response response = await dio.get('http://localhost:3000/teacher/sheet',
+        // Response response = await dio.get('${widget.apiUrl}/teacher/sheet',
         //     data: {courseCode: widget.courseCode},
         //     options: Options(headers: {'Authorization': 'Bearer $token'}));
         // String url = response.data['url'];

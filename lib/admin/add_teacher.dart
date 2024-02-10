@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 
 class AddTeacherPage extends StatefulWidget {
   final CookieJar cookieJar;
+  final String apiUrl;
 
-  AddTeacherPage({required this.cookieJar});
+  AddTeacherPage({required this.cookieJar, required this.apiUrl});
   @override
   _AddTeacherPageState createState() => _AddTeacherPageState();
 }
@@ -92,13 +93,13 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
     try {
       // fetch the cookie - token
       List<Cookie> results = await widget.cookieJar
-          .loadForRequest(Uri.parse('http://localhost:3000/admin/login'));
+          .loadForRequest(Uri.parse('${widget.apiUrl}/admin/login'));
       print(results);
 
       if (results.isNotEmpty) {
         String token = results.first.value;
         Response response =
-            await dio.post('http://localhost:3000/admin/create-teacher',
+            await dio.post('${widget.apiUrl}/admin/create-teacher',
                 data: {
                   'userName': enteredUsername,
                   'email': enteredEmail,

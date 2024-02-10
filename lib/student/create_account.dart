@@ -6,8 +6,9 @@ import 'package:wifi/student/student.dart';
 
 class CreateAccountPage extends StatefulWidget {
   final CookieJar cookieJar;
+  final String apiUrl;
 
-  CreateAccountPage({required this.cookieJar});
+  CreateAccountPage({required this.cookieJar, required this.apiUrl});
 
   @override
   _CreateAccountPageState createState() => _CreateAccountPageState();
@@ -133,7 +134,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       final dio = Dio();
       try {
         Response response =
-            await dio.post('http://localhost:3000/student/signup', data: {
+            await dio.post('${widget.apiUrl}/student/signup', data: {
           "userName": nameController.text,
           "email": emailController.text,
           "password": passwordController.text,
@@ -147,6 +148,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
             context,
             StudentPage(
               cookieJar: widget.cookieJar,
+              apiUrl: widget.apiUrl,
             ));
       } catch (e) {
         print('Error: $e');

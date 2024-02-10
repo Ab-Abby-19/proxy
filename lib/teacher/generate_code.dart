@@ -10,8 +10,12 @@ import 'package:dio/dio.dart';
 class GenerateCodePage extends StatefulWidget {
   final CookieJar cookieJar;
   final String courseCode;
+  final String apiUrl;
 
-  GenerateCodePage({required this.cookieJar, required this.courseCode});
+  GenerateCodePage(
+      {required this.cookieJar,
+      required this.courseCode,
+      required this.apiUrl});
 
   @override
   _GenerateCodePageState createState() => _GenerateCodePageState();
@@ -113,12 +117,12 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
       dio.interceptors.add(CookieManager(widget.cookieJar));
 
       List<Cookie> res = await widget.cookieJar
-          .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+          .loadForRequest(Uri.parse('${widget.apiUrl}/teacher/login'));
       // print(res);
       if (res.isNotEmpty) {
         String token = res.first.value;
         Response response = await dio.post(
-          'http://localhost:3000/teacher/create-session',
+          '${widget.apiUrl}/teacher/create-session',
           data: {
             'courseID': widget.courseCode,
             'location': {
@@ -164,14 +168,14 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
       try {
         _timer.cancel();
         List<Cookie> res = await widget.cookieJar
-            .loadForRequest(Uri.parse('http://localhost:3000/teacher/login'));
+            .loadForRequest(Uri.parse('${widget.apiUrl}/teacher/login'));
         if (res.isNotEmpty) {
           String token = res.first.value;
           final dio = Dio();
           dio.interceptors.add(CookieManager(widget.cookieJar));
 
           Response response =
-              await dio.post('http://localhost:3000/teacher/stop-session',
+              await dio.post('${widget.apiUrl}/teacher/stop-session',
                   data: {
                     'sessionCode': _code,
                   },

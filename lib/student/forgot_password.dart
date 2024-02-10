@@ -5,8 +5,9 @@ import 'new_password.dart'; // Import NewPasswordPage
 
 class ForgotPasswordPage extends StatefulWidget {
   final CookieJar cookieJar;
+  final String apiUrl;
 
-  ForgotPasswordPage({required this.cookieJar});
+  ForgotPasswordPage({required this.cookieJar, required this.apiUrl});
 
   @override
   _ForgotPasswordPageState createState() => _ForgotPasswordPageState();
@@ -64,6 +65,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           builder: (context) => NewPasswordPage(
                             email: emailController.text,
                             cookieJar: widget.cookieJar,
+                            apiUrl: widget.apiUrl,
                           ),
                         ),
                       );
@@ -109,7 +111,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     try {
       final dio = Dio();
       Response response =
-          await dio.post('http://localhost:3000/student/send-otp', data: {
+          await dio.post('${widget.apiUrl}/student/send-otp', data: {
         'email': emailController.text,
       });
       print(response.data);
@@ -122,7 +124,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     try {
       final dio = Dio();
       Response response =
-          await dio.post('http://localhost:3000/student/verify-otp', data: {
+          await dio.post('${widget.apiUrl}/student/verify-otp', data: {
         'otp': otpController.text,
         'email': emailController.text,
       });

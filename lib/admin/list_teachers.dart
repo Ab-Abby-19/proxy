@@ -6,8 +6,9 @@ import 'package:dio/dio.dart';
 
 class ListTeachersPage extends StatefulWidget {
   final CookieJar cookieJar;
+  final String apiUrl;
 
-  ListTeachersPage({required this.cookieJar});
+  ListTeachersPage({required this.cookieJar, required this.apiUrl});
 
   @override
   _ListTeachersPageState createState() => _ListTeachersPageState();
@@ -103,15 +104,14 @@ class _ListTeachersPageState extends State<ListTeachersPage> {
   Future<List<Teacher>> fetchTeachers() async {
     try {
       List<Cookie> res = await widget.cookieJar
-          .loadForRequest(Uri.parse('http://localhost:3000/admin/login'));
+          .loadForRequest(Uri.parse('${widget.apiUrl}/admin/login'));
       if (res.isNotEmpty) {
         String token = res.first.value;
 
         final dio = Dio();
         dio.interceptors.add(CookieManager(widget.cookieJar));
 
-        Response response = await dio.get(
-            'http://localhost:3000/admin/teachers',
+        Response response = await dio.get('${widget.apiUrl}/admin/teachers',
             options: Options(headers: {'Authorization': 'Bearer $token'}));
         // print(response.data);
 

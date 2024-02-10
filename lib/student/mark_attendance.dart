@@ -10,8 +10,12 @@ import 'package:wifi/student/view_attendance.dart';
 class MarkAttendancePage extends StatefulWidget {
   final CookieJar cookieJar;
   final String subjectCode;
+  final String apiUrl;
 
-  MarkAttendancePage({required this.cookieJar, required this.subjectCode});
+  MarkAttendancePage(
+      {required this.cookieJar,
+      required this.subjectCode,
+      required this.apiUrl});
 
   @override
   _MarkAttendancePageState createState() => _MarkAttendancePageState();
@@ -78,12 +82,12 @@ class _MarkAttendancePageState extends State<MarkAttendancePage> {
   void _submitAttendanceCode() async {
     try {
       List<Cookie> res = await widget.cookieJar
-          .loadForRequest(Uri.parse('http://localhost:3000/student/login'));
+          .loadForRequest(Uri.parse('${widget.apiUrl}/student/login'));
       print(res);
       if (res.isNotEmpty) {
         String token = res.first.value;
         Response response = await dio.post(
-          'http://localhost:3000/student/attendance',
+          '${widget.apiUrl}/student/attendance',
           data: {
             'code': attendanceCodeController.text.trim(),
             'courseID': widget.subjectCode,

@@ -7,8 +7,12 @@ import 'package:fl_chart/fl_chart.dart';
 class ViewAttendancePage extends StatefulWidget {
   final CookieJar cookieJar;
   final String subjectCode;
+  final String apiUrl;
 
-  ViewAttendancePage({required this.cookieJar, required this.subjectCode});
+  ViewAttendancePage(
+      {required this.cookieJar,
+      required this.subjectCode,
+      required this.apiUrl});
 
   @override
   _ViewAttendancePageState createState() => _ViewAttendancePageState();
@@ -134,14 +138,14 @@ class _ViewAttendancePageState extends State<ViewAttendancePage> {
   void getAttendance() async {
     try {
       List<Cookie> res = await widget.cookieJar
-          .loadForRequest(Uri.parse('http://localhost:3000/student/login'));
+          .loadForRequest(Uri.parse('${widget.apiUrl}/student/login'));
       if (res.isNotEmpty) {
         String token = res.first.value;
         final dio = Dio();
         dio.interceptors.add(CookieManager(widget.cookieJar));
 
         Response response = await dio.get(
-          'http://localhost:3000/student/attendance',
+          '${widget.apiUrl}/student/attendance',
           data: {
             'courseID': widget.subjectCode,
           },

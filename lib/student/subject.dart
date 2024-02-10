@@ -10,8 +10,9 @@ import 'package:cookie_jar/cookie_jar.dart';
 
 class StudentSubjectPage extends StatefulWidget {
   final CookieJar cookieJar;
+  final String apiUrl;
 
-  StudentSubjectPage({required this.cookieJar});
+  StudentSubjectPage({required this.cookieJar, required this.apiUrl});
 
   @override
   _StudentSubjectPageState createState() => _StudentSubjectPageState();
@@ -101,6 +102,7 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
                             ViewAttendancePage(
                               cookieJar: widget.cookieJar,
                               subjectCode: subject.courseCode,
+                              apiUrl: widget.apiUrl,
                             ));
                       },
                       child: MouseRegion(
@@ -137,7 +139,8 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
                           context,
                           MarkAttendancePage(
                               cookieJar: widget.cookieJar,
-                              subjectCode: subject.courseCode));
+                              subjectCode: subject.courseCode,
+                              apiUrl: widget.apiUrl));
                     },
                     child: Icon(
                       Icons.add_circle,
@@ -200,6 +203,7 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
                             context,
                             AddSubjectPage(
                               cookieJar: widget.cookieJar,
+                              apiUrl: widget.apiUrl,
                             ));
                       },
                       style: ElevatedButton.styleFrom(
@@ -223,15 +227,14 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
   Future<List<Subject>> fetchSubjects() async {
     try {
       List<Cookie> res = await widget.cookieJar
-          .loadForRequest(Uri.parse('http://localhost:3000/student/login'));
+          .loadForRequest(Uri.parse('${widget.apiUrl}/student/login'));
       if (res.isNotEmpty) {
         String token = res.first.value;
         // print(token);
         final dio = Dio();
         dio.interceptors.add(CookieManager(widget.cookieJar));
 
-        Response response = await dio.get(
-            'http://localhost:3000/student/courses',
+        Response response = await dio.get('${widget.apiUrl}/student/courses',
             options: Options(headers: {'Authorization': 'Bearer $token'}));
         print(response.data);
         List<dynamic> data = response.data['courses'];
