@@ -4,17 +4,30 @@ import 'student/student.dart';
 import 'admin/admin.dart';
 import 'utils/notification_helper.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
-const String API_URL = 'https://2d24-106-205-155-61.ngrok-free.app';
+NotificationHelper notificationHelper = NotificationHelper();
 
-void main() {
+const String API_URL =
+    'https://a129-2401-4900-7a92-e09e-2e4e-b58a-c6df-33aa.ngrok-free.app';
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await notificationHelper.initialize();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  FirebaseMessaging.instance.requestPermission();
 
   runApp(MyApp(apiUrl: API_URL));
 }
 
 class MyApp extends StatelessWidget {
-  final NotificationHelper notificationHelper = NotificationHelper();
   final CookieJar? cookieJar;
   final String apiUrl;
 
@@ -30,19 +43,15 @@ class MyApp extends StatelessWidget {
           secondary: Color.fromARGB(255, 23, 23, 24),
         ),
       ),
-      home: MainPage(
-          // notificationHelper: notificationHelper,
-          cookieJar: cookieJar ?? CookieJar()),
+      home: MainPage(cookieJar: cookieJar ?? CookieJar()),
     );
   }
 }
 
 class MainPage extends StatefulWidget {
   final CookieJar cookieJar;
-  // final NotificationHelper notificationHelper;
 
   MainPage({required this.cookieJar});
-  // MainPage({required this.notificationHelper, required this.cookieJar});
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -53,7 +62,17 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     _checkLoggedIn(context);
-    // widget.notificationHelper.configureSelectNotificationSubject(context);
+
+    requestPermission();
+  }
+
+  void requestPermission() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      // Permission.location,
+      Permission.notification,
+      // Permission.nearbyWifiDevices,
+    ].request();
+    print(statuses);
   }
 
   @override
@@ -75,11 +94,21 @@ class _MainPageState extends State<MainPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildButton(context, 'TEACHER',
-                  TeacherPage(cookieJar: widget.cookieJar, apiUrl: API_URL)),
+              _buildButton(
+                  context,
+                  'TEACHER',
+                  TeacherPage(
+                    cookieJar: widget.cookieJar,
+                    apiUrl: API_URL,
+                  )),
               SizedBox(height: 20),
-              _buildButton(context, 'STUDENT',
-                  StudentPage(cookieJar: widget.cookieJar, apiUrl: API_URL)),
+              _buildButton(
+                  context,
+                  'STUDENT',
+                  StudentPage(
+                      cookieJar: widget.cookieJar,
+                      apiUrl: API_URL,
+                      notificationHelper: notificationHelper)),
               SizedBox(height: 20),
               _buildButton(context, 'ADMIN', AdminPage(apiUrl: API_URL)),
             ],

@@ -2,17 +2,24 @@
 import 'package:flutter/material.dart';
 import 'package:wifi/main.dart';
 import 'package:wifi/student/mark_attendance.dart';
-import 'add_subject.dart'; // Import the necessary add subject page
+import 'package:wifi/student/update_details.dart';
+import 'add_subject.dart';
 import 'view_attendance.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:wifi/utils/notification_helper.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class StudentSubjectPage extends StatefulWidget {
   final CookieJar cookieJar;
   final String apiUrl;
+  final NotificationHelper notificationHelper;
 
-  StudentSubjectPage({required this.cookieJar, required this.apiUrl});
+  StudentSubjectPage(
+      {required this.cookieJar,
+      required this.apiUrl,
+      required this.notificationHelper});
 
   @override
   _StudentSubjectPageState createState() => _StudentSubjectPageState();
@@ -25,11 +32,26 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
   void initState() {
     super.initState();
     subjects = fetchSubjects();
+    requestPermissions();
   }
 
   @override
   Widget build(BuildContext context) {
     return _buildCoursePage(context);
+  }
+
+  void sendNotification(String title, String value) {
+    widget.notificationHelper.showNotificationAndroid(title, value);
+  }
+
+  void requestPermissions() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.location,
+      Permission.storage,
+      Permission.nearbyWifiDevices,
+      Permission.accessNotificationPolicy,
+    ].request();
+    print(statuses);
   }
 
   Widget _buildSubjectTable(BuildContext context, List<Subject> subjects) {
@@ -140,7 +162,8 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
                           MarkAttendancePage(
                               cookieJar: widget.cookieJar,
                               subjectCode: subject.courseCode,
-                              apiUrl: widget.apiUrl));
+                              apiUrl: widget.apiUrl,
+                              notificationHelper: widget.notificationHelper));
                     },
                     child: Icon(
                       Icons.add_circle,
@@ -204,6 +227,7 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
                             AddSubjectPage(
                               cookieJar: widget.cookieJar,
                               apiUrl: widget.apiUrl,
+                              notificationHelper: widget.notificationHelper,
                             ));
                       },
                       style: ElevatedButton.styleFrom(
@@ -211,6 +235,23 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
                       ),
                       child: Text(
                         'Join Course',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _navigateTo(
+                            context,
+                            UpdateDetailsPage(
+                              cookieJar: widget.cookieJar,
+                              apiUrl: widget.apiUrl,
+                            ));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 1, 11, 45),
+                      ),
+                      child: Text(
+                        'Update Details',
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),

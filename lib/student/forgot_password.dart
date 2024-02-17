@@ -1,13 +1,18 @@
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:wifi/utils/notification_helper.dart';
 import 'new_password.dart'; // Import NewPasswordPage
 
 class ForgotPasswordPage extends StatefulWidget {
   final CookieJar cookieJar;
   final String apiUrl;
+  final NotificationHelper notificationHelper;
 
-  ForgotPasswordPage({required this.cookieJar, required this.apiUrl});
+  ForgotPasswordPage(
+      {required this.cookieJar,
+      required this.apiUrl,
+      required this.notificationHelper});
 
   @override
   _ForgotPasswordPageState createState() => _ForgotPasswordPageState();
@@ -66,6 +71,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             email: emailController.text,
                             cookieJar: widget.cookieJar,
                             apiUrl: widget.apiUrl,
+                            notificationHelper: widget.notificationHelper,
                           ),
                         ),
                       );

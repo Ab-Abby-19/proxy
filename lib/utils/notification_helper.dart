@@ -5,41 +5,38 @@ class NotificationHelper {
       FlutterLocalNotificationsPlugin();
 
   NotificationHelper() {
-    _initializeNotifications();
+    initialize();
   }
 
-  Future<void> _initializeNotifications() async {
+  Future<void> initialize() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('app_icon');
+        AndroidInitializationSettings('@mipmap/ic_launcher');
 
     const InitializationSettings initializationSettings =
         InitializationSettings(
-            android: initializationSettingsAndroid, iOS: null, macOS: null);
+      android: initializationSettingsAndroid,
+      iOS: null,
+    );
 
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
     );
   }
 
-  Future<void> showNotification(String title, String body) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'your_channel_id',
-      'Your Channel Name',
-      'Your Channel Description',
-      importance: Importance.max,
-      priority: Priority.high,
-      ticker: 'ticker',
-    );
+  void showNotificationAndroid(String title, String value) async {
+    const AndroidNotificationDetails androidNotificationDetails =
+        AndroidNotificationDetails('channel_id', 'Channel Name',
+            channelDescription: 'Channel Description',
+            importance: Importance.max,
+            priority: Priority.high,
+            ticker: 'ticker');
 
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
+    int notification_id = 1;
+    const NotificationDetails notificationDetails =
+        NotificationDetails(android: androidNotificationDetails);
 
     await flutterLocalNotificationsPlugin.show(
-      0, // Notification ID (you can use any unique integer)
-      title,
-      body,
-      platformChannelSpecifics,
-    );
+        notification_id, title, value, notificationDetails,
+        payload: 'Not present');
   }
 }

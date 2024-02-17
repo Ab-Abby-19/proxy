@@ -3,12 +3,17 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:wifi/student/student.dart';
+import 'package:wifi/utils/notification_helper.dart';
 
 class CreateAccountPage extends StatefulWidget {
   final CookieJar cookieJar;
   final String apiUrl;
+  final NotificationHelper notificationHelper;
 
-  CreateAccountPage({required this.cookieJar, required this.apiUrl});
+  CreateAccountPage(
+      {required this.cookieJar,
+      required this.apiUrl,
+      required this.notificationHelper});
 
   @override
   _CreateAccountPageState createState() => _CreateAccountPageState();
@@ -149,6 +154,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
             StudentPage(
               cookieJar: widget.cookieJar,
               apiUrl: widget.apiUrl,
+              notificationHelper: widget.notificationHelper,
             ));
       } catch (e) {
         print('Error: $e');

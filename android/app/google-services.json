@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "5942759980",
+    "project_id": "attendez-fd983",
+    "storage_bucket": "attendez-fd983.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:5942759980:android:8ed62951c8f1b21ce3b789",
+        "android_client_info": {
+          "package_name": "com.example.wifi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6F7RgL0o3emZ-lTLThVzFiCl1nclFq8Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -4,18 +4,19 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:location/location.dart';
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:wifi/student/view_attendance.dart';
+import 'package:wifi/utils/notification_helper.dart';
 
 class MarkAttendancePage extends StatefulWidget {
   final CookieJar cookieJar;
   final String subjectCode;
   final String apiUrl;
+  final NotificationHelper notificationHelper;
 
   MarkAttendancePage(
       {required this.cookieJar,
       required this.subjectCode,
-      required this.apiUrl});
+      required this.apiUrl,
+      required this.notificationHelper});
 
   @override
   _MarkAttendancePageState createState() => _MarkAttendancePageState();
@@ -23,9 +24,9 @@ class MarkAttendancePage extends StatefulWidget {
 
 class _MarkAttendancePageState extends State<MarkAttendancePage> {
   TextEditingController attendanceCodeController = TextEditingController();
-  double? _latitude = 51.507351;
-  double? _longitude = -0.127758;
-  String _addr = 'wlp2s0';
+  double? _latitude;
+  double? _longitude;
+  String _addr = '';
   final coookieJar = CookieJar();
   final dio = Dio();
   final info = NetworkInfo();
@@ -34,7 +35,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage> {
   void initState() {
     super.initState();
     dio.interceptors.add(CookieManager(coookieJar));
-    // _getLocation();
+    _getLocation();
     _getNetworkInfo();
   }
 
@@ -86,6 +87,15 @@ class _MarkAttendancePageState extends State<MarkAttendancePage> {
       print(res);
       if (res.isNotEmpty) {
         String token = res.first.value;
+        if (_addr == '') {
+          _getNetworkInfo();
+          await Future.delayed(Duration(milliseconds: 500));
+        }
+        print('BSSID: $_addr');
+        if (_latitude == null || _longitude == null) {
+          _getLocation();
+          await Future.delayed(Duration(milliseconds: 500));
+        }
         Response response = await dio.post(
           '${widget.apiUrl}/student/mark-attendance',
           data: {
@@ -147,15 +157,15 @@ class _MarkAttendancePageState extends State<MarkAttendancePage> {
 
   Future<void> _getNetworkInfo() async {
     try {
+      final info = NetworkInfo();
       // _requestLocationPermission();
-      final wifiBroadCast = await info.getWifiBroadcast();
-      print('Wifi broadcast: $wifiBroadCast');
-      if (wifiBroadCast != null) {
+      final wifiBSSID = await info.getWifiBSSID();
+      if (wifiBSSID != null) {
         setState(() {
-          _addr = wifiBroadCast;
+          _addr = wifiBSSID;
         });
       }
-      print(wifiBroadCast);
+      print('Wifi BSSID: ${wifiBSSID}');
     } catch (e) {
       print('Failed to get network info: $e');
     }

@@ -1,6 +1,7 @@
 // lib/student/login_page.dart
 import 'package:flutter/material.dart';
 import 'package:wifi/student/subject.dart';
+import 'package:wifi/utils/notification_helper.dart';
 import 'create_account.dart'; // Import the necessary create account page
 import 'forgot_password.dart'; // Import the forgot password page
 import 'package:dio/dio.dart';
@@ -10,8 +11,12 @@ import 'package:cookie_jar/cookie_jar.dart';
 class StudentPage extends StatefulWidget {
   final CookieJar cookieJar;
   final String apiUrl;
+  final NotificationHelper notificationHelper;
 
-  StudentPage({required this.cookieJar, required this.apiUrl});
+  StudentPage(
+      {required this.cookieJar,
+      required this.apiUrl,
+      required this.notificationHelper});
 
   @override
   _StudentPageState createState() => _StudentPageState();
@@ -84,7 +89,8 @@ class _StudentPageState extends State<StudentPage> {
                         context,
                         ForgotPasswordPage(
                             cookieJar: widget.cookieJar,
-                            apiUrl: widget.apiUrl));
+                            apiUrl: widget.apiUrl,
+                            notificationHelper: widget.notificationHelper));
                   },
                   child: Text(
                     'Forgot Password?',
@@ -98,7 +104,8 @@ class _StudentPageState extends State<StudentPage> {
                         context,
                         CreateAccountPage(
                             cookieJar: widget.cookieJar,
-                            apiUrl: widget.apiUrl));
+                            apiUrl: widget.apiUrl,
+                            notificationHelper: widget.notificationHelper));
                   },
                   child: Text(
                     'Sign Up',
@@ -136,9 +143,9 @@ class _StudentPageState extends State<StudentPage> {
       _navigateTo(
           context,
           StudentSubjectPage(
-            cookieJar: cookieJar,
-            apiUrl: widget.apiUrl,
-          ));
+              cookieJar: cookieJar,
+              apiUrl: widget.apiUrl,
+              notificationHelper: widget.notificationHelper));
     } catch (e) {
       print('Dio error: $e');
       showDialog(

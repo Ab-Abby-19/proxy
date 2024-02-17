@@ -25,17 +25,17 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
   int _remainingTime = 60;
   final info = NetworkInfo();
   String _addr = '';
-  double? _latitude = 51.507351;
-  double? _longitude = -0.127758;
+  double? _latitude;
+  double? _longitude;
   String _code = '';
   bool sessionWorking = true;
 
   @override
   void initState() {
     super.initState();
+    _getNetworkInfo();
     _startTimer();
     _generateRandomCode();
-    _getNetworkInfo();
     _getLocation();
   }
 
@@ -119,6 +119,15 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
       // print(res);
       if (res.isNotEmpty) {
         String token = res.first.value;
+        if (_addr == '') {
+          _getNetworkInfo();
+          await Future.delayed(Duration(milliseconds: 500));
+        }
+        print('BSSID: $_addr');
+        if (_latitude == null || _longitude == null) {
+          _getLocation();
+          await Future.delayed(Duration(milliseconds: 500));
+        }
         Response response = await dio.post(
           '${widget.apiUrl}/teacher/create-session',
           data: {
@@ -204,7 +213,7 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
           _addr = wifiBSSID;
         });
       }
-      print(wifiBSSID);
+      print('Wifi BSSID: ${wifiBSSID}');
     } catch (e) {
       print('Failed to get network info: $e');
     }

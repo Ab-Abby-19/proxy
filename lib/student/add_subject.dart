@@ -2,12 +2,17 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:wifi/student/subject.dart';
+import 'package:wifi/utils/notification_helper.dart';
 
 class AddSubjectPage extends StatefulWidget {
   final CookieJar cookieJar;
   final String apiUrl;
+  final NotificationHelper notificationHelper;
 
-  AddSubjectPage({required this.cookieJar, required this.apiUrl});
+  AddSubjectPage(
+      {required this.cookieJar,
+      required this.apiUrl,
+      required this.notificationHelper});
 
   @override
   _AddSubjectPageState createState() => _AddSubjectPageState();
@@ -81,7 +86,10 @@ class _AddSubjectPageState extends State<AddSubjectPage> {
         _navigateTo(
             context,
             StudentSubjectPage(
-                cookieJar: widget.cookieJar, apiUrl: widget.apiUrl));
+              cookieJar: widget.cookieJar,
+              apiUrl: widget.apiUrl,
+              notificationHelper: widget.notificationHelper,
+            ));
       }
     } catch (e) {
       print(e);
