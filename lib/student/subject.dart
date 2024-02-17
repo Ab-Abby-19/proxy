@@ -207,7 +207,7 @@ class _StudentSubjectPageState extends State<StudentSubjectPage> {
                             ));
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Color.fromARGB(255, 1, 11, 45),
+                        backgroundColor: Color.fromARGB(255, 1, 11, 45),
                       ),
                       child: Text(
                         'Join Course',

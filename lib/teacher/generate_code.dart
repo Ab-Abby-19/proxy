@@ -96,7 +96,7 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.red,
+                    backgroundColor: Colors.red,
                   ),
                   child: Text(
                     'Stop',

@@ -68,7 +68,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
                   _submitCourse(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Color.fromARGB(255, 1, 11, 45),
+                  backgroundColor: Color.fromARGB(255, 1, 11, 45),
                 ),
                 child: Text(
                   'Submit',
@@ -101,8 +101,10 @@ class _AddCoursePageState extends State<AddCoursePage> {
                 },
                 options: Options(headers: {'Authorization': 'Bearer $token'}));
         print(response.data);
-        _navigateTo(
-            context, CoursePage(cookieJar: cookieJar, apiUrl: widget.apiUrl));
+        if (response.statusCode == 200) {
+          _navigateTo(context,
+              CoursePage(cookieJar: widget.cookieJar, apiUrl: widget.apiUrl));
+        }
       }
     } catch (e) {
       print(e);

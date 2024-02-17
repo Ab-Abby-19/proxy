@@ -68,7 +68,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage> {
                         _submitAttendanceCode();
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Color.fromARGB(255, 1, 11, 45),
+                        backgroundColor: Color.fromARGB(255, 1, 11, 45),
                       ),
                       child: Text(
                         'Submit',
@@ -87,7 +87,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage> {
       if (res.isNotEmpty) {
         String token = res.first.value;
         Response response = await dio.post(
-          '${widget.apiUrl}/student/attendance',
+          '${widget.apiUrl}/student/mark-attendance',
           data: {
             'code': attendanceCodeController.text.trim(),
             'courseID': widget.subjectCode,

@@ -67,6 +67,15 @@ class _CoursePageState extends State<CoursePage> {
               Text('Code', style: TextStyle(fontSize: 14))
             ],
           )),
+          DataColumn(
+            label: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Delete', style: TextStyle(fontSize: 14)),
+              ],
+            ),
+          )
         ],
         rows: courses.map((course) {
           return DataRow(
@@ -110,6 +119,14 @@ class _CoursePageState extends State<CoursePage> {
                 Text(
                   course.code,
                   style: TextStyle(color: Colors.white),
+                ),
+              ),
+              DataCell(
+                IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red),
+                  onPressed: () {
+                    _deleteCourse(context, course.courseCode.toString());
+                  },
                 ),
               )
             ],
@@ -166,7 +183,7 @@ class _CoursePageState extends State<CoursePage> {
                                 apiUrl: widget.apiUrl));
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Color.fromARGB(255, 1, 11, 45),
+                        backgroundColor: Color.fromARGB(255, 1, 11, 45),
                       ),
                       child: Text(
                         'Add Course',
@@ -232,6 +249,34 @@ class _CoursePageState extends State<CoursePage> {
       );
     } catch (e) {
       throw Exception('Error logging out: $e');
+    }
+  }
+
+  void _deleteCourse(BuildContext context, String courseCode) async {
+    try {
+      List<Cookie> res = await widget.cookieJar
+          .loadForRequest(Uri.parse('${widget.apiUrl}/teacher/login'));
+      if (res.isNotEmpty) {
+        String token = res.first.value;
+        final dio = Dio();
+        dio.interceptors.add(CookieManager(widget.cookieJar));
+        Response response = await dio.delete(
+          '${widget.apiUrl}/teacher/delete-course',
+          options: Options(headers: {
+            'Authorization': 'Bearer $token',
+          }),
+          data: {'courseCode': courseCode},
+        );
+        if (response.statusCode == 200) {
+          setState(() {
+            courses = fetchCourses();
+          });
+        } else {
+          throw Exception('Error deleting course');
+        }
+      }
+    } catch (e) {
+      throw Exception('Error deleting course: $e');
     }
   }
 }

@@ -5,7 +5,8 @@ import 'admin/admin.dart';
 import 'utils/notification_helper.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 
-const String API_URL = 'https://48c9-112-196-126-3.ngrok-free.app';
+const String API_URL =
+    'https://b446-2401-4900-7d7c-b0c9-fc1-dd90-c4eb-6781.ngrok-free.app';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

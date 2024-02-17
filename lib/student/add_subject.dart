@@ -48,7 +48,7 @@ class _AddSubjectPageState extends State<AddSubjectPage> {
                   _addSubject();
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Color.fromARGB(255, 1, 11, 45),
+                  backgroundColor: Color.fromARGB(255, 1, 11, 45),
                 ),
                 child: Text(
                   'Submit',

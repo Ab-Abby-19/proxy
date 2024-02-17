@@ -65,7 +65,7 @@ class _TeacherPageState extends State<TeacherPage> {
                     _login(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: Color.fromARGB(255, 1, 11, 45),
+                    backgroundColor: Color.fromARGB(255, 1, 11, 45),
                     padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
