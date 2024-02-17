@@ -5,6 +5,8 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:wifi/main.dart';
 import 'add_course.dart'; // Import the necessary add course page
 import 'base_course.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 
 class CoursePage extends StatefulWidget {
   final CookieJar cookieJar;
@@ -18,11 +20,15 @@ class CoursePage extends StatefulWidget {
 
 class _CoursePageState extends State<CoursePage> {
   late Future<List<Course>> courses;
+  // final info = NetworkInfo();
 
   @override
   void initState() {
     super.initState();
     courses = fetchCourses();
+
+    requestPermission();
+    // _getNetworkInfo();
   }
 
   @override
@@ -277,6 +283,32 @@ class _CoursePageState extends State<CoursePage> {
       }
     } catch (e) {
       throw Exception('Error deleting course: $e');
+    }
+  }
+
+  void requestPermission() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.location,
+      Permission.storage,
+      Permission.nearbyWifiDevices,
+      Permission.accessNotificationPolicy,
+    ].request();
+    print(statuses);
+  }
+
+  void _getNetworkInfo() async {
+    try {
+      final info = NetworkInfo();
+      // _requestLocationPermission();
+      final wifiBSSID = await info.getWifiBSSID();
+      if (wifiBSSID != null) {
+        print('BSSID: $wifiBSSID');
+      } else {
+        print("Nahi chhl rha");
+      }
+      // print(wifiBSSID);
+    } catch (e) {
+      print('Failed to get network info: $e');
     }
   }
 }

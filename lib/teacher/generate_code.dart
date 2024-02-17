@@ -3,7 +3,6 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:location/location.dart';
 import 'package:dio/dio.dart';
 
@@ -25,7 +24,7 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
   late Timer _timer;
   int _remainingTime = 60;
   final info = NetworkInfo();
-  String _addr = 'wlp2s0';
+  String _addr = '';
   double? _latitude = 51.507351;
   double? _longitude = -0.127758;
   String _code = '';
@@ -36,9 +35,8 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
     super.initState();
     _startTimer();
     _generateRandomCode();
-    // _getNetworkInfo();
-    // _getLocation();
-    // _requestLocationPermission();
+    _getNetworkInfo();
+    _getLocation();
   }
 
   @override
@@ -198,31 +196,17 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
 
   Future<void> _getNetworkInfo() async {
     try {
+      final info = NetworkInfo();
       // _requestLocationPermission();
-      final wifiBroadCast = await info.getWifiBroadcast();
-      print('Wifi broadcast: $wifiBroadCast');
-      if (wifiBroadCast != null) {
+      final wifiBSSID = await info.getWifiBSSID();
+      if (wifiBSSID != null) {
         setState(() {
-          _addr = wifiBroadCast;
+          _addr = wifiBSSID;
         });
       }
-      print(wifiBroadCast);
+      print(wifiBSSID);
     } catch (e) {
       print('Failed to get network info: $e');
-    }
-  }
-
-  void _requestLocationPermission() async {
-    var status = await Permission.location.status;
-    if (status.isDenied) {
-      var result = await Permission.location.request();
-      if (result.isGranted) {
-        print('Permission granted');
-      } else {
-        print('Permission denied');
-      }
-    } else if (status.isGranted) {
-      print('Permission granted');
     }
   }
 
@@ -235,6 +219,7 @@ class _GenerateCodePageState extends State<GenerateCodePage> {
         _latitude = currLocation.latitude;
         _longitude = currLocation.longitude;
       });
+      print('Latitude: $_latitude, Longitude: $_longitude');
     } catch (e) {
       print('Failed to get location: $e');
     }
